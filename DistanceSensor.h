@@ -2,16 +2,15 @@
 // Created by markus on 05.04.21.
 //
 
-#ifndef MR_CPP_CODE_SENSOR_H
-#define MR_CPP_CODE_SENSOR_H
+#ifndef MR_CPP_CODE_DISTANCESENSOR_H
+#define MR_CPP_CODE_DISTANCESENSOR_H
 
 
 #include "world.h"
+#include "interfaces/SensorInterface.h"
 
-class Sensor {
+class DistanceSensor : public SensorInterface {
 private:
-    World* world;
-    Robot* robot;
     double sensor_angle;
     double sensor_max_distance;
 
@@ -19,7 +18,7 @@ private:
     cv::Point2d sensor_data_abs_position;
     cv::Point2d sensor_data_dxy;
 public:
-    Sensor(World* world, Robot* robot, double sensor_angle, double sensor_distance);
+    DistanceSensor(World* world, Robot* robot, double sensor_angle, double sensor_distance);
 
     double get_sensor_angle();
 
@@ -29,10 +28,10 @@ public:
 
     double get_simplified_sensor_value();
 
-    void update_sensor_data();
+    void update_sensor_data() override;
 
-    void draw_sensor_data(cv::Mat image);
+    void draw_sensor_data(cv::Mat image) override;
 };
 
 
-#endif //MR_CPP_CODE_SENSOR_H
+#endif //MR_CPP_CODE_DISTANCESENSOR_H

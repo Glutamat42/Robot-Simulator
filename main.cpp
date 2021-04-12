@@ -1,26 +1,28 @@
 #include <iostream>
 #include "world.h"
 #include "robot.h"
-#include "sensor.h"
+#include "DistanceSensor.h"
 #include "constants.h"
 #include "RobotOperator.h"
 #include <opencv2/opencv.hpp>
 #include <opencv2/core/core.hpp>
 #include <unistd.h>
+#include <random>
 
 using chrono_clock = std::chrono::system_clock;
-//using sec = std::chrono::duration<double>;
 using chrono_ms = std::chrono::duration<double, std::milli>;
 
 
 int main() {
+    srand(time(NULL));
+
     World world = World("world1.png");
 
     Robot r = Robot(std::string("r1"), 8, cv::Point2d(300.0, 70.0), 0.1 * M_PI, &world, M_PI / 3, 200);
-    Sensor s1 = Sensor(&world, &r, 0.20 * M_PI, 200);
-    Sensor s2 = Sensor(&world, &r, -0.20 * M_PI, 200);
-    Sensor s3 = Sensor(&world, &r, 0.45 * M_PI, 200);
-    Sensor s4 = Sensor(&world, &r, -0.45 * M_PI, 200);
+    DistanceSensor s1 = DistanceSensor(&world, &r, 0.20 * M_PI, 200);
+    DistanceSensor s2 = DistanceSensor(&world, &r, -0.20 * M_PI, 200);
+    DistanceSensor s3 = DistanceSensor(&world, &r, 0.45 * M_PI, 200);
+    DistanceSensor s4 = DistanceSensor(&world, &r, -0.45 * M_PI, 200);
     r.add_sensor(&s1);
     r.add_sensor(&s2);
     r.add_sensor(&s3);
@@ -61,7 +63,7 @@ int main() {
         const double target_ms = 1000 / TARGET_TPS / GAME_SPEED_MODIFIER;
         const double real_tps = 1000 / target_ms;
         if (loop_duration.count() < target_ms) {
-            std::cout << "loop took " << loop_duration.count() << "ms" << std::endl;
+//            std::cout << "loop took " << loop_duration.count() << "ms" << std::endl;
             usleep((target_ms - loop_duration.count()) * 1000);
         } else {
             std::cout << "loop took " << loop_duration.count() << "ms; TPS: " << real_tps << "instead of target TPS: "

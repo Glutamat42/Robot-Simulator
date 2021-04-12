@@ -11,10 +11,9 @@
 #include <vector>
 #include <string>
 #include "interfaces/RobotControlInterface.h"
+#include "interfaces/SensorInterface.h"
 
 class World;
-
-class Sensor;
 
 class Robot : public RobotControlInterface {
 private:
@@ -27,7 +26,9 @@ private:
     double max_speed; // max speed in px/s
     double move_angle = 0;
     double move_speed = 0;
-    std::vector<Sensor *> sensors;
+    double move_target_distance = 0; // will set_target_move_distance for this amount of pixels and then stop
+    double move_target_turn_angle = 0; // will set_target_turn_angle for this angle and then stop turning
+    std::vector<SensorInterface *> sensors;
 
     bool collision_detection(cv::Point2d pos);
 
@@ -42,31 +43,51 @@ public:
 
     double get_radius();
 
-    /** specify distance until robot should stop moving. It'll move with the specified speed (set_speed)
-     * If this function is not called the robot will move until stopped by manually setting move_speed to 0
+    /** specify distance until robot should stop moving. It'll set_target_move_distance with the specified speed (set_speed)
+     * If this function is not called the robot will set_target_move_distance until stopped by manually setting move_speed to 0
      * or setting a distance limit by this function
      *
      * TODO: implement
      *
      * @param pixel
      */
-    void move(double pixel);
+    void set_target_move_distance(double pixel) {
+        this->move_target_distance = pixel;
+    };
 
-    /** same as move(...) but for angle
+    double get_target_move_distance() {
+        return move_target_distance;
+    }
+
+    /** same as set_target_move_distance(...) but for angle
      *
      * TODO: implement
      *
      * @param angle
      */
-    void turn(double angle);
+    void set_target_turn_angle(double angle) {
+        this->move_target_turn_angle = angle;
+    }
 
-    int add_sensor(Sensor *sensor);
+    double get_target_turn_angle() {
+        return move_target_turn_angle;
+    }
 
-    std::vector<Sensor *> get_sensors();
+    int add_sensor(SensorInterface *sensor);
 
-    void set_move_angle(double angle);
+    std::vector<SensorInterface *> get_sensors();
+
+    void set_turn_speed(double angle);
+
+    double get_turn_speed() {
+        return this-> move_angle;
+    }
 
     void set_speed(double speed);
+
+    double get_speed() {
+        return this->move_speed;
+    }
 
     void update();
 

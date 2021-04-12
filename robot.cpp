@@ -3,7 +3,6 @@
 //
 
 #include "robot.h"
-#include "sensor.h"
 #include "world.h"
 #include "constants.h"
 
@@ -41,14 +40,6 @@ double Robot::get_radius() {
     return this->radius;
 }
 
-void Robot::move(double pixel) {
-
-}
-
-void Robot::turn(double angle) {
-
-}
-
 /** check for collision robot <-> wall
  *
  * @param pos center
@@ -76,16 +67,16 @@ bool Robot::collision_detection(cv::Point2d pos) {
     return false;
 }
 
-int Robot::add_sensor(Sensor *sensor) {
+int Robot::add_sensor(SensorInterface *sensor) {
     this->sensors.push_back(sensor);
     return this->sensors.size();
 }
 
-std::vector<Sensor *> Robot::get_sensors() {
+std::vector<SensorInterface *> Robot::get_sensors() {
     return this->sensors;
 }
 
-void Robot::set_move_angle(double angle) {
+void Robot::set_turn_speed(double angle) {
     if (abs(angle) > this->max_angle) {
         this->move_angle = copysign(1.0, angle) * this->max_angle;
     } else {
@@ -101,9 +92,37 @@ void Robot::set_speed(double speed) {
     }
 }
 
+
+
 void Robot::update() {
-    this->orientation = fmod((this->orientation + this->move_angle / TARGET_TPS), (2 * M_PI));
-    double travel_distance = this->move_speed / TARGET_TPS;
+    double desired_turn_angle = this->move_angle / TARGET_TPS;
+    double desired_move_distance = this->move_speed / TARGET_TPS;
+
+    // if target turn angle is set
+    if (move_target_turn_angle != 0) {
+        if (abs(desired_turn_angle) > abs(move_target_turn_angle)) {
+            // finished turning for given angle (after this step)
+            desired_turn_angle = move_target_turn_angle;
+            this->move_angle = 0;
+        }
+        if (desired_turn_angle * move_target_turn_angle >= 0){ // both values have the same sign or desired_turn_angle is 0
+            move_target_turn_angle -= desired_turn_angle;
+        } else {
+            move_target_turn_angle += desired_turn_angle;
+        }
+    }
+
+    // if target travel/move distance is set
+    if (move_target_distance != 0) {
+        if (abs(desired_move_distance) > abs(move_target_distance)) {
+            // finished moving for given distance (after this step)
+            desired_move_distance = move_target_distance;
+            this->move_speed = 0;
+        }
+        move_target_distance -= desired_move_distance;
+    }
+
+    this->orientation = fmod((this->orientation + desired_turn_angle), (2 * M_PI));
     double dx = cos(this->orientation);
     double dy = sin(this->orientation);
     double last_collision_free_distance = 0.0;
@@ -112,7 +131,7 @@ void Robot::update() {
     double step = 0.0;
     do {
         step += CALCULATION_RESOLUTION;
-        if (step > travel_distance) step = travel_distance;
+        if (step > desired_move_distance) step = desired_move_distance;
 
         if (this->collision_detection(
                 cv::Point2d(
@@ -122,16 +141,16 @@ void Robot::update() {
             break;
         }
         last_collision_free_distance = step;
-    } while (step < travel_distance);
+    } while (step < desired_move_distance);
 
-    // move
+    // update robot position
     this->pos = cv::Point2d(
             dx * last_collision_free_distance + this->pos.x,
             dy * last_collision_free_distance + this->pos.y
     );
 
     // update sensors
-    for (Sensor *sensor : this->sensors) {
+    for (SensorInterface *sensor : this->sensors) {
         sensor->update_sensor_data();
     }
 }
@@ -141,7 +160,7 @@ void Robot::draw_robot(cv::Mat image) {
     line(image,
          this->get_position(),
          this->get_position() + cv::Point2d(cos(this->get_orientation()) * this->get_radius(),
-                                             sin(this->get_orientation()) * this->get_radius()),
+                                            sin(this->get_orientation()) * this->get_radius()),
          CV_RGB(0, 255, 0),
          1);
 }

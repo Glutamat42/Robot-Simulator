@@ -2,21 +2,21 @@
 // Created by markus on 05.04.21.
 //
 
-#include "sensor.h"
+#include "DistanceSensor.h"
 #include "constants.h"
 
-Sensor::Sensor(World *world, Robot *robot, double sensor_angle, double sensor_distance) {
+DistanceSensor::DistanceSensor(World *world, Robot *robot, double sensor_angle, double sensor_distance) : SensorInterface(world, robot) {
     this->world = world;
     this->robot = robot;
     this->sensor_angle = sensor_angle;
     this->sensor_max_distance = sensor_distance;
 }
 
-double Sensor::get_sensor_angle() {
+double DistanceSensor::get_sensor_angle() {
     return this->sensor_angle;
 }
 
-double Sensor::get_sensor_max_distance() {
+double DistanceSensor::get_sensor_max_distance() {
     return this->sensor_max_distance;
 }
 
@@ -24,11 +24,11 @@ double Sensor::get_sensor_max_distance() {
  *
  * @return -1 if nothing detected (in sensor range), otherwise distance to object
  */
-double Sensor::get_sensor_value() {
+double DistanceSensor::get_sensor_value() {
     return this->sensor_data_value;
 }
 
-void Sensor::update_sensor_data() {
+void DistanceSensor::update_sensor_data() {
     // abs sensor angle relative to world
     double sensor_dx = cos(this->robot->get_orientation() + this->sensor_angle);
     double sensor_dy = sin(this->robot->get_orientation() + this->sensor_angle);
@@ -53,7 +53,7 @@ void Sensor::update_sensor_data() {
     }
 }
 
-void Sensor::draw_sensor_data(cv::Mat image) {
+void DistanceSensor::draw_sensor_data(cv::Mat image) {
     double draw_distance;
     if (this->sensor_data_value != -1) {
         draw_distance = this->sensor_data_value;
@@ -71,7 +71,7 @@ void Sensor::draw_sensor_data(cv::Mat image) {
  *
  * @return measured distance
  */
-double Sensor::get_simplified_sensor_value() {
+double DistanceSensor::get_simplified_sensor_value() {
     if (this->sensor_data_value == -1) return this->sensor_max_distance;
     return sensor_data_value;
 }

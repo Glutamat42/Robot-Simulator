@@ -3,7 +3,6 @@
 //
 
 #include "world.h"
-#include "sensor.h"
 #include "constants.h"
 
 /**
@@ -42,7 +41,7 @@ void World::show_map() {
 
     for (Robot* robot : this->robots) {
         robot->draw_robot(image);
-        for (Sensor* sensor : robot->get_sensors()) {
+        for (SensorInterface* sensor : robot->get_sensors()) {
             sensor->draw_sensor_data(image);
         }
     }

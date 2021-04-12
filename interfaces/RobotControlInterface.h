@@ -5,23 +5,31 @@
 #ifndef MR_CPP_CODE_ROBOTCONTROLINTERFACE_H
 #define MR_CPP_CODE_ROBOTCONTROLINTERFACE_H
 
-class Sensor;
+#include "SensorInterface.h"
 
 class RobotControlInterface {
 public:
-    virtual ~RobotControlInterface(){};
+    virtual ~RobotControlInterface() = default;;
 
     virtual double get_radius() = 0;
 
-    virtual void move(double pixel)= 0;
+    virtual void set_target_move_distance(double pixel) = 0;
 
-    virtual void turn(double angle)= 0;
+    virtual double get_target_move_distance() = 0;
 
-    virtual std::vector<Sensor *> get_sensors()= 0;
+    virtual void set_target_turn_angle(double angle) = 0;
 
-    virtual void set_move_angle(double angle)= 0;
+    virtual double get_target_turn_angle() = 0;
 
-    virtual void set_speed(double speed)= 0;
+    virtual std::vector<SensorInterface *> get_sensors() = 0;
+
+    virtual void set_turn_speed(double angle) = 0;
+
+    virtual double get_turn_speed() = 0;
+
+    virtual void set_speed(double speed) = 0;
+
+    virtual double get_speed() = 0;
 };
 
 #endif //MR_CPP_CODE_ROBOTCONTROLINTERFACE_H
