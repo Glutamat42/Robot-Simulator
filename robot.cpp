@@ -136,4 +136,14 @@ void Robot::update() {
     }
 }
 
+void Robot::draw_robot(cv::Mat image) {
+    circle(image, this->get_position(), (int) this->get_radius(), CV_RGB(255, 0, 0), 1);
+    line(image,
+         this->get_position(),
+         this->get_position() + cv::Point2d(cos(this->get_orientation()) * this->get_radius(),
+                                             sin(this->get_orientation()) * this->get_radius()),
+         CV_RGB(0, 255, 0),
+         1);
+}
+
 

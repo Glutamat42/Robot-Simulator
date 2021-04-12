@@ -12,5 +12,5 @@ message(STATUS "    include path: ${OpenCV_INCLUDE_DIRS}")
 
 configure_file(world1.png world1.png COPYONLY)
 
-add_executable(mr_cpp_code main.cpp robot.cpp robot.h world.cpp world.h sensor.cpp sensor.h constants.h RobotOperator.cpp RobotOperator.h)
+add_executable(mr_cpp_code main.cpp robot.cpp robot.h world.cpp world.h sensor.cpp sensor.h constants.h RobotOperator.cpp RobotOperator.h interfaces/RobotControlInterface.h)
 target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS} )

@@ -16,11 +16,11 @@ using chrono_ms = std::chrono::duration<double, std::milli>;
 int main() {
     World world = World("world1.png");
 
-    Robot r = Robot(std::string("r1"), 8, cv::Point2d(300.0, 70.0), 0.1 * M_PI, &world, M_PI/6, 100);
-    Sensor s1 = Sensor(&world, &r, 0.20, 200);
-    Sensor s2 = Sensor(&world, &r, -0.20, 200);
-    Sensor s3 = Sensor(&world, &r, 0.45, 200);
-    Sensor s4 = Sensor(&world, &r, -0.45, 200);
+    Robot r = Robot(std::string("r1"), 8, cv::Point2d(300.0, 70.0), 0.1 * M_PI, &world, M_PI / 3, 200);
+    Sensor s1 = Sensor(&world, &r, 0.20 * M_PI, 200);
+    Sensor s2 = Sensor(&world, &r, -0.20 * M_PI, 200);
+    Sensor s3 = Sensor(&world, &r, 0.45 * M_PI, 200);
+    Sensor s4 = Sensor(&world, &r, -0.45 * M_PI, 200);
     r.add_sensor(&s1);
     r.add_sensor(&s2);
     r.add_sensor(&s3);
@@ -42,7 +42,20 @@ int main() {
         ro.update();
         r.update();
         world.show_map();
-        cv::waitKey(1);
+
+        // simple pause function
+        if ((char) cv::waitKey(1) == (char) 32) {
+            bool key_was_released = false;
+            std::cout << "Paused" << std::endl;
+            while (true) {
+                if (!key_was_released && (char) cv::waitKey(1) != (char) 32) key_was_released = true;
+                if (key_was_released && ((char) cv::waitKey(1) == (char) 32)) {
+                    std::cout << "Continue" << std::endl;
+                    break;
+                }
+            }
+        }
+
 
         const chrono_ms loop_duration = chrono_clock::now() - loop_start_chrono;
         const double target_ms = 1000 / TARGET_TPS / GAME_SPEED_MODIFIER;

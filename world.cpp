@@ -41,14 +41,7 @@ void World::show_map() {
     this->map.copyTo(image);
 
     for (Robot* robot : this->robots) {
-        circle(image, robot->get_position(), (int) robot->get_radius(), CV_RGB(255, 0, 0), 1);
-        line(image,
-             robot->get_position(),
-             robot->get_position() + cv::Point2d(cos(robot->get_orientation()) * robot->get_radius(),
-                                                sin(robot->get_orientation()) * robot->get_radius()),
-             CV_RGB(0, 255, 0),
-             1);
-
+        robot->draw_robot(image);
         for (Sensor* sensor : robot->get_sensors()) {
             sensor->draw_sensor_data(image);
         }

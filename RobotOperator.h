@@ -8,12 +8,13 @@
 
 #include "robot.h"
 #include "sensor.h"
+#include "interfaces/RobotControlInterface.h"
 
 class RobotOperator {
 private:
-    Robot* robot;
+    RobotControlInterface* robot;
 public:
-    RobotOperator(Robot* robot);
+    RobotOperator(RobotControlInterface* robot);
 
     void update();
 };
