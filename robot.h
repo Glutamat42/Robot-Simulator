@@ -37,6 +37,8 @@ public:
     Robot(std::string name, int radius, cv::Point2d start_pos, double start_orientation, World *world,
           double max_angle = M_PI / 6, double max_speed = 50.0);
 
+    Robot(std::string name, int radius, World *world, double max_angle = M_PI / 6, double max_speed = 50.0);
+
     cv::Point2d get_position();
 
     double get_orientation();

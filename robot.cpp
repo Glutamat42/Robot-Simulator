@@ -23,9 +23,30 @@ Robot::Robot(std::string name,
 
     if (this->collision_detection(this->pos)) {
         throw std::invalid_argument("cant spawn in wall");
-    } else {
-        std::cout << "i spawned :)" << std::endl;
     }
+}
+
+Robot::Robot(std::string name, int radius, World *world, double max_angle, double max_speed) {
+    this->name = name;
+    this->radius = radius;
+    this->world = world;
+    this->max_angle = max_angle;
+    this->max_speed = max_speed;
+    this->orientation = fmod(rand(), (2 * M_PI)) - M_PI;
+
+    cv::Point2d start_pos;
+    while (true) {
+        start_pos = cv::Point2d(
+                // rand() % (width - radius) + radius / 2 with 3 decimals
+                (rand() % (((int) world->get_map_bounds().x - radius) * 1000) / 1000) + radius / 2,
+                (rand() % (((int) world->get_map_bounds().y - radius) * 1000) / 1000) + radius / 2
+        );
+        if (!this->collision_detection(start_pos)) {
+            break;
+        }
+    }
+
+    this->pos = start_pos;
 }
 
 cv::Point2d Robot::get_position() {
@@ -93,7 +114,6 @@ void Robot::set_speed(double speed) {
 }
 
 
-
 void Robot::update() {
     double desired_turn_angle = this->move_angle / GAME_TPS;
     double desired_move_distance = this->move_speed / GAME_TPS;
@@ -105,7 +125,8 @@ void Robot::update() {
             desired_turn_angle = move_target_turn_angle;
             this->move_angle = 0;
         }
-        if (desired_turn_angle * move_target_turn_angle >= 0){ // both values have the same sign or desired_turn_angle is 0
+        if (desired_turn_angle * move_target_turn_angle >=
+            0) { // both values have the same sign or desired_turn_angle is 0
             move_target_turn_angle -= desired_turn_angle;
         } else {
             move_target_turn_angle += desired_turn_angle;
@@ -164,5 +185,3 @@ void Robot::draw_robot(cv::Mat image) {
          CV_RGB(0, 255, 0),
          1);
 }
-
-
