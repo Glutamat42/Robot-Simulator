@@ -24,7 +24,7 @@ Robot::Robot(std::string name,
     if (this->collision_detection(this->pos)) {
         throw std::invalid_argument("cant spawn in wall");
     } else {
-        std::cout << "i spawned :)";
+        std::cout << "i spawned :)" << std::endl;
     }
 }
 
@@ -95,8 +95,8 @@ void Robot::set_speed(double speed) {
 
 
 void Robot::update() {
-    double desired_turn_angle = this->move_angle / TARGET_TPS;
-    double desired_move_distance = this->move_speed / TARGET_TPS;
+    double desired_turn_angle = this->move_angle / GAME_TPS;
+    double desired_move_distance = this->move_speed / GAME_TPS;
 
     // if target turn angle is set
     if (move_target_turn_angle != 0) {

@@ -36,6 +36,18 @@ int main() {
     cv::waitKey();
 
 
+    // Begin game loop stuff
+    const double TARGET_TPS = GAME_TPS * GAME_SPEED_MODIFIER; // This is the real tps we want to reach and depends on the game speed modifier. For all ingame calculations just GAME_TPS is used
+    const double target_ms = 1000 / GAME_TPS / GAME_SPEED_MODIFIER;
+    const double real_tps = 1000 / target_ms;
+
+    // log some configs
+    std::cout << "Game TPS: " << GAME_TPS << " Game speed modifier: " << GAME_SPEED_MODIFIER << " resulting in target tps of: " << TARGET_TPS << std::endl;
+
+    // perf measurement variables
+    double perf_measurement_duration_counter = 0; // will sum up the calculation time used in one second and then be reset
+    short perf_measurement_iterations_counter = 0;
+
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "EndlessLoop"
     while (true) {
@@ -60,14 +72,20 @@ int main() {
 
 
         const chrono_ms loop_duration = chrono_clock::now() - loop_start_chrono;
-        const double target_ms = 1000 / TARGET_TPS / GAME_SPEED_MODIFIER;
-        const double real_tps = 1000 / target_ms;
         if (loop_duration.count() < target_ms) {
 //            std::cout << "loop took " << loop_duration.count() << "ms" << std::endl;
             usleep((target_ms - loop_duration.count()) * 1000);
         } else {
             std::cout << "loop took " << loop_duration.count() << "ms; TPS: " << real_tps << "instead of target TPS: "
-                      << TARGET_TPS << std::endl;
+                      << GAME_TPS << std::endl;
+        }
+        perf_measurement_duration_counter += loop_duration.count();
+        perf_measurement_iterations_counter++;
+        if (perf_measurement_iterations_counter == GAME_TPS * GAME_SPEED_MODIFIER) {
+            int percentage = perf_measurement_duration_counter / 10; // / 1000 * 100
+            std::cout << "required " << (int)perf_measurement_duration_counter << "ms (" << percentage << "%)" << std::endl;
+            perf_measurement_duration_counter = 0;
+            perf_measurement_iterations_counter = 0;
         }
     }
 #pragma clang diagnostic pop
