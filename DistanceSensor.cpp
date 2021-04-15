@@ -4,6 +4,7 @@
 
 #include "DistanceSensor.h"
 #include "constants.h"
+#include "helpers.cpp"
 
 DistanceSensor::DistanceSensor(World *world, Robot *robot, double sensor_angle, double sensor_distance) : SensorInterface(world, robot) {
     this->world = world;
@@ -29,7 +30,7 @@ double DistanceSensor::get_sensor_value() {
 }
 
 void DistanceSensor::update_sensor_data() {
-    // abs sensor angle relative to world
+    // abs. sensor angle relative to world
     double sensor_dx = cos(this->robot->get_orientation() + this->sensor_angle);
     double sensor_dy = sin(this->robot->get_orientation() + this->sensor_angle);
     this->sensor_data_dxy = cv::Point2d(sensor_dx, sensor_dy);
@@ -48,6 +49,13 @@ void DistanceSensor::update_sensor_data() {
 
         if (this->world->check_collision(cv::Point2d(ray_x, ray_y))) {
             this->sensor_data_value = i;
+
+            // add noise
+            if (this->inaccuracy != 0) {
+                double noise_multiplier = get_random_percentage(this->inaccuracy);
+                this->sensor_data_value *= (1 + noise_multiplier);
+            }
+
             break;
         }
     }

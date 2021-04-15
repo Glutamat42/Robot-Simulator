@@ -18,7 +18,7 @@ int main() {
 
     World world = World("world1.png");
 
-//    Robot r = Robot(std::string("r1"), 8, &world, M_PI / 3, 200);
+    Robot r = Robot(std::string("r1"), 8, cv::Point2d(300.0, 70.0), 0.1 * M_PI, &world, M_PI / 3, 200);
     DistanceSensor s1 = DistanceSensor(&world, &r, 0.20 * M_PI, 200);
     DistanceSensor s2 = DistanceSensor(&world, &r, -0.20 * M_PI, 200);
     DistanceSensor s3 = DistanceSensor(&world, &r, 0.45 * M_PI, 200);
