@@ -11,17 +11,14 @@
 #include <vector>
 #include <string>
 #include "interfaces/RobotControlInterface.h"
-#include "interfaces/SensorInterface.h"
+#include "../interfaces/SensorInterface.h"
+#include "interfaces/CollidableCircle.h"
 
-class World;
 
-class Robot : public RobotControlInterface {
+class Robot : public CollidableCircle, public RobotControlInterface {
 private:
     std::string name;
-    double radius;
-    cv::Point2d pos;
     double orientation;
-    World *world;
     double max_angle; // max angle per second
     double max_speed; // max speed in px/s
     double move_angle = 0;
@@ -30,8 +27,6 @@ private:
     double move_target_turn_angle = 0; // will set_target_turn_angle for this angle and then stop turning
     std::vector<SensorInterface *> sensors;
 
-    bool collision_detection(cv::Point2d pos);
-
 
 public:
     Robot(std::string name, int radius, cv::Point2d start_pos, double start_orientation, World *world,
@@ -39,11 +34,13 @@ public:
 
     Robot(std::string name, int radius, World *world, double max_angle = M_PI / 6, double max_speed = 50.0);
 
-    cv::Point2d get_position();
-
-    double get_orientation();
+    std::string get_name() override;
 
     double get_radius();
+
+    void handleCollision(CollidableObject* object) override;
+
+    double get_orientation();
 
     /** specify distance until robot should stop moving. It'll set_target_move_distance with the specified speed (set_speed)
      * If this function is not called the robot will set_target_move_distance until stopped by manually setting move_speed to 0
@@ -53,11 +50,11 @@ public:
      *
      * @param pixel
      */
-    void set_target_move_distance(double pixel) {
+    void set_target_move_distance(double pixel) override {
         this->move_target_distance = pixel;
     };
 
-    double get_target_move_distance() {
+    double get_target_move_distance() override {
         return move_target_distance;
     }
 
@@ -67,27 +64,27 @@ public:
      *
      * @param angle
      */
-    void set_target_turn_angle(double angle) {
+    void set_target_turn_angle(double angle) override {
         this->move_target_turn_angle = angle;
     }
 
-    double get_target_turn_angle() {
+    double get_target_turn_angle() override {
         return move_target_turn_angle;
     }
 
     int add_sensor(SensorInterface *sensor);
 
-    std::vector<SensorInterface *> get_sensors();
+    std::vector<SensorInterface *> get_sensors() override;
 
-    void set_turn_speed(double angle);
+    void set_turn_speed(double angle) override;
 
-    double get_turn_speed() {
+    double get_turn_speed() override {
         return this-> move_angle;
     }
 
-    void set_speed(double speed);
+    void set_speed(double speed) override;
 
-    double get_speed() {
+    double get_speed() override {
         return this->move_speed;
     }
 

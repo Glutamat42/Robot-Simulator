@@ -6,23 +6,27 @@
 #define MR_CPP_CODE_WORLD_H
 
 
-#include "robot.h"
+#include "interactive_objects/robot.h"
 
 class World {
 private:
     cv::Mat map;
-    std::vector<Robot*> robots;
+    std::vector<CollidableObject*> objects;
 
 public:
     World(std::string map_filename);
 
-    int add_robot(Robot* robot);
+    std::vector<Robot*> get_robots();
 
     bool check_collision(cv::Point2d point);
 
     cv::Point2d get_map_bounds();
 
     void show_map();
+
+    void add_object(CollidableObject* object);
+
+    std::vector<CollidableObject*> get_objects();
 };
 
 

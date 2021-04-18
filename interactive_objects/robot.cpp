@@ -3,8 +3,9 @@
 //
 
 #include "robot.h"
-#include "world.h"
-#include "constants.h"
+#include "../world.h"
+#include "../constants.h"
+#include "../helpers.h"
 
 Robot::Robot(std::string name,
              int radius,
@@ -21,8 +22,12 @@ Robot::Robot(std::string name,
     this->max_angle = max_angle;
     this->max_speed = max_speed;
 
-    if (this->collision_detection(this->pos)) {
+    if (this->collision_detection_map(this->pos)) {
         throw std::invalid_argument("cant spawn in wall");
+    }
+
+    if (!this->collision_detection_objects(world->get_objects()).empty()) {
+        std::cout << "failed" << std::endl;
     }
 }
 
@@ -41,7 +46,7 @@ Robot::Robot(std::string name, int radius, World *world, double max_angle, doubl
                 (rand() % (((int) world->get_map_bounds().x - radius) * 1000) / 1000) + radius / 2,
                 (rand() % (((int) world->get_map_bounds().y - radius) * 1000) / 1000) + radius / 2
         );
-        if (!this->collision_detection(start_pos)) {
+        if (!this->collision_detection_map(start_pos)) {
             break;
         }
     }
@@ -49,43 +54,8 @@ Robot::Robot(std::string name, int radius, World *world, double max_angle, doubl
     this->pos = start_pos;
 }
 
-cv::Point2d Robot::get_position() {
-    return this->pos;
-}
-
 double Robot::get_orientation() {
     return this->orientation;
-}
-
-double Robot::get_radius() {
-    return this->radius;
-}
-
-/** check for collision robot <-> wall
- *
- * @param pos center
- * @return true if collision, false if not
- */
-bool Robot::collision_detection(cv::Point2d pos) {
-    // check map bounds
-    if (pos.x + radius > this->world->get_map_bounds().x
-        || pos.y + radius > this->world->get_map_bounds().y
-        || pos.x - radius < 0
-        || pos.y - radius < 0) {
-        return true;
-    }
-
-    // check collisions on map
-    for (int x = floor(pos.x) - this->radius; x <= ceil(pos.x) + radius; ++x) {
-        for (int y = floor(pos.y) - this->radius; y <= ceil(pos.y) + radius; ++y) {
-            if ((x - pos.x) * (x - pos.x) + (y - pos.y) * (y - pos.y) <= this->radius * this->radius) {
-                if (this->world->check_collision(cv::Point2d(x, y))) return true;
-            }
-        }
-    }
-
-    // no collision
-    return false;
 }
 
 int Robot::add_sensor(SensorInterface *sensor) {
@@ -154,13 +124,28 @@ void Robot::update() {
         step += CALCULATION_RESOLUTION;
         if (step > desired_move_distance) step = desired_move_distance;
 
-        if (this->collision_detection(
-                cv::Point2d(
-                        dx * step + this->pos.x,
-                        dy * step + this->pos.y
-                ))) {
+        cv::Point2d currentCheckPoint = cv::Point2d(
+                dx * step + this->pos.x,
+                dy * step + this->pos.y
+        );
+
+        // check map collision
+        WallPoint* collidedWallPoint = this->collision_detection_map(currentCheckPoint);
+        if (collidedWallPoint) {
+            this->handleCollision(collidedWallPoint);
             break;
         }
+
+        // check object collision
+        std::vector<CollidableObject *> collidedObjects = this->collision_detection_objects(world->get_objects(), &currentCheckPoint);
+        if (!collidedObjects.empty()) {
+            for (CollidableObject *object : collidedObjects) {
+                object->handleCollision(this);
+                this->handleCollision(object);
+            }
+            break;
+        }
+
         last_collision_free_distance = step;
     } while (step < desired_move_distance);
 
@@ -177,11 +162,23 @@ void Robot::update() {
 }
 
 void Robot::draw_robot(cv::Mat image) {
-    circle(image, this->get_position(), (int) this->get_radius(), CV_RGB(255, 0, 0), 1);
+    circle(image, this->get_position(), (int) this->radius, CV_RGB(255, 0, 0), 1);
     line(image,
          this->get_position(),
-         this->get_position() + cv::Point2d(cos(this->get_orientation()) * this->get_radius(),
-                                            sin(this->get_orientation()) * this->get_radius()),
+         this->get_position() + cv::Point2d(cos(this->get_orientation()) * this->radius,
+                                            sin(this->get_orientation()) * this->radius),
          CV_RGB(0, 255, 0),
          1);
+}
+
+std::string Robot::get_name() {
+    return this->name;
+}
+
+void Robot::handleCollision(CollidableObject *object) {
+    std::cout << this->name << ": Collision detected" << std::endl;
+}
+
+double Robot::get_radius() {
+    return this->radius;
 }

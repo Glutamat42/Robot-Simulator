@@ -6,9 +6,9 @@
 #define MR_CPP_CODE_ROBOTOPERATOR_H
 
 
-#include "robot.h"
-#include "DistanceSensor.h"
-#include "interfaces/RobotControlInterface.h"
+#include "interactive_objects/robot.h"
+#include "interactive_objects/DistanceSensor.h"
+#include "interactive_objects/interfaces/RobotControlInterface.h"
 #include "constants.h"
 
 class RobotOperator {

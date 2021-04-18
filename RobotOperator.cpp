@@ -14,21 +14,21 @@ RobotOperator::RobotOperator(RobotControlInterface *robot) {
 }
 
 void RobotOperator::update() {
-    if (this->novelty_detection()) {
-        std::cout << "Looks like i'm stuck :(" << std::endl;
-        this->unstucking = true;
-        this->robot->set_target_turn_angle(std::fmod(((double) rand() / 1000), 2 * M_PI));
-        this->robot->set_speed(0);
-    }
-
     if (unstucking) {
         if (this->robot->get_target_turn_angle() == 0) {
             this->unstucking = false;
-            std::cout << "finished unstucking" << std::endl;
+            std::cout << this->robot->get_name() << ": finished unstucking" << std::endl;
             this->robot->set_speed(150);
         } else {
             return;
         }
+    }
+
+    if (this->novelty_detection()) {
+        std::cout << this->robot->get_name() << ": Looks like i'm stuck :(" << std::endl;
+        this->unstucking = true;
+        this->robot->set_target_turn_angle(std::fmod(((double) rand() / 1000), 2 * M_PI));
+        this->robot->set_speed(0);
     }
 
     std::vector<DistanceSensor *> distance_sensors = this->filter_for_distance_sensor(this->robot->get_sensors());

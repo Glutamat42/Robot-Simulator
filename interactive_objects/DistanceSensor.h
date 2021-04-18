@@ -6,8 +6,8 @@
 #define MR_CPP_CODE_DISTANCESENSOR_H
 
 
-#include "world.h"
-#include "interfaces/SensorInterface.h"
+#include "../world.h"
+#include "../interfaces/SensorInterface.h"
 
 class DistanceSensor : public SensorInterface {
 private:

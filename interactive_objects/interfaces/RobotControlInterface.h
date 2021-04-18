@@ -5,7 +5,7 @@
 #ifndef MR_CPP_CODE_ROBOTCONTROLINTERFACE_H
 #define MR_CPP_CODE_ROBOTCONTROLINTERFACE_H
 
-#include "SensorInterface.h"
+#include "../../interfaces/SensorInterface.h"
 
 class RobotControlInterface {
 public:
@@ -30,6 +30,8 @@ public:
     virtual void set_speed(double speed) = 0;
 
     virtual double get_speed() = 0;
+
+    virtual std::string get_name() = 0;
 };
 
 #endif //MR_CPP_CODE_ROBOTCONTROLINTERFACE_H

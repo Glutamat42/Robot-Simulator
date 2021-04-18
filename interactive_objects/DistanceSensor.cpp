@@ -3,8 +3,8 @@
 //
 
 #include "DistanceSensor.h"
-#include "constants.h"
-#include "helpers.cpp"
+#include "../constants.h"
+#include "../helpers.h"
 
 DistanceSensor::DistanceSensor(World *world, Robot *robot, double sensor_angle, double sensor_distance) : SensorInterface(world, robot) {
     this->world = world;
