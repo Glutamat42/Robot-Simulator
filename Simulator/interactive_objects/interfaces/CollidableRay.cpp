@@ -74,4 +74,4 @@ CollidableRay::collision_detection_objects(std::vector<CollidableObject *> colli
     }
 
     return collided_with;
-};
+}

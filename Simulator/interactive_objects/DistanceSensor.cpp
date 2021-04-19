@@ -2,8 +2,8 @@
 // Created by markus on 05.04.21.
 //
 
+#include <random>
 #include "DistanceSensor.h"
-#include "../helpers.h"
 #include "CollisionData.h"
 
 DistanceSensor::DistanceSensor(World *world, Robot *robot, double sensor_angle, double sensor_distance)
@@ -18,7 +18,7 @@ double DistanceSensor::get_sensor_angle() {
     return this->sensor_angle;
 }
 
-double DistanceSensor::get_sensor_max_distance() {
+[[maybe_unused]] double DistanceSensor::get_sensor_max_distance() {
     return this->length;
 }
 
@@ -56,12 +56,6 @@ void DistanceSensor::update_sensor_data() {
     auto* pointOfCollision = dynamic_cast<WallPoint *>(this->collision_detection_map(nullptr, &distanceToCollision));
     if (pointOfCollision) {
         this->sensor_data_value = distanceToCollision;
-
-        // add noise
-        if (this->inaccuracy != 0) {
-            double noise_multiplier = get_random_percentage(this->inaccuracy);
-            this->sensor_data_value *= (1 + noise_multiplier);
-        }
     }
 
     // Object collision
@@ -77,6 +71,17 @@ void DistanceSensor::update_sensor_data() {
         double distance = sqrt(distanceVector.x * distanceVector.x + distanceVector.y * distanceVector.y);
         if (distance < this->sensor_data_value || this->sensor_data_value == -1) {
             this->sensor_data_value = distance;
+        }
+    }
+
+    if (this->sensor_data_value != -1) {
+        // add noise
+        if (this->standardDeviation != 0) {
+//            double noise_multiplier = get_random_percentage(this->standardDeviation);
+            std::random_device rd{};
+            std::mt19937 gen{rd()};
+            std::normal_distribution<> d{0,this->standardDeviation};
+            this->sensor_data_value *= (1 + d(gen));
         }
     }
 }

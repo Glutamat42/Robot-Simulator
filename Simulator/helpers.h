@@ -8,8 +8,6 @@
 #include "interactive_objects/interfaces/CollidableCircle.h"
 #include "interactive_objects/interfaces/CollidableRay.h"
 
-double get_random_percentage(double in_range = 0.025);
-
 
 /** check collision between two circles
  *

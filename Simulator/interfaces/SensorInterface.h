@@ -15,13 +15,13 @@ class SensorInterface {
 protected:
     World* world;
     Robot* robot;
-    double inaccuracy;
+    double standardDeviation;
 
 public:
-    inline SensorInterface(World* world, Robot* robot, double inaccuracy = 0.025) {
+    inline SensorInterface(World* world, Robot* robot, double standardDeviation = 0.025) {
         this->world = world;
         this->robot = robot;
-        this->inaccuracy = inaccuracy * NOISE_MODIFIER;
+        this->standardDeviation = standardDeviation * NOISE_MODIFIER;
     };
 
     virtual void update_sensor_data() = 0;

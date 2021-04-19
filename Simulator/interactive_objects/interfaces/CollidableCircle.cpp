@@ -5,7 +5,6 @@
 #include "CollidableCircle.h"
 #include "../../world.h"
 #include "../../helpers.h"
-#include "../WallPoint.h"
 #include "../CollisionData.h"
 
 /** check for collision robot <-> wall

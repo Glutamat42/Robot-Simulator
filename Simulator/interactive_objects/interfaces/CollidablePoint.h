@@ -31,7 +31,7 @@ public:
         this->objectType = CollidableObjectType::point;
     }
 
-    virtual cv::Point2d get_position() {
+    [[maybe_unused]] virtual cv::Point2d get_position() {
         return this->pos;
     };
 };

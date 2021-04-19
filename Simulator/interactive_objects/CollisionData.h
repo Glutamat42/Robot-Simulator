@@ -11,7 +11,6 @@ class CollisionData {
 private:
     CollidableObject *object;
     cv::Point2d point;
-    double distance;
 public:
     /**
      *
@@ -19,10 +18,9 @@ public:
      * @param point the exact point where the collision happened
      * @param distance additional info, its meaning might differ, it could be eg the distance between point and the starting point of a vector
      */
-    CollisionData(CollidableObject *object, cv::Point2d point, double distance = -1) {
+    CollisionData(CollidableObject *object, cv::Point2d point) {
         this->object = object;
         this->point = point;
-        this->distance = distance;
     }
 
     CollidableObject* getObject() {

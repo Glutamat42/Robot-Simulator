@@ -44,7 +44,7 @@ public:
         return this->pos;
     };
 
-    double get_length() const {
+    [[maybe_unused]] double get_length() const {
         return this->length;
     }
 

@@ -5,10 +5,6 @@
 #include "helpers.h"
 #include "interactive_objects/interfaces/CollidableCircle.h"
 
-double get_random_percentage(double in_range) {
-    return fmod(rand() / 1000.0, in_range) - in_range / 2;
-}
-
 std::optional<cv::Point2d> collision_detection_circle_circle(CollidableCircle *c1, CollidableCircle *c2, cv::Point2d *pos) {
     if (!pos) {
         cv::Point2d p = c1->get_position();

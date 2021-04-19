@@ -13,7 +13,7 @@ public:
 
     virtual double get_radius() = 0;
 
-    virtual void set_target_move_distance(double pixel) = 0;
+    [[maybe_unused]] virtual void set_target_move_distance(double pixel) = 0;
 
     virtual double get_target_move_distance() = 0;
 
@@ -25,7 +25,7 @@ public:
 
     virtual void set_turn_speed(double angle) = 0;
 
-    virtual double get_turn_speed() = 0;
+    [[maybe_unused]] virtual double get_turn_speed() = 0;
 
     virtual void set_speed(double speed) = 0;
 

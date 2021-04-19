@@ -4,7 +4,6 @@
 
 #include "robot.h"
 #include "../world.h"
-#include "../constants.h"
 #include "../helpers.h"
 #include "CollisionData.h"
 

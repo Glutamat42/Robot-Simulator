@@ -3,6 +3,7 @@
 //
 
 #include <chrono>
+#include <unistd.h>
 #include "SimulationScenario.h"
 
 using chrono_clock = std::chrono::system_clock;
@@ -54,8 +55,15 @@ void SimulationScenario::startLoop() {
             }
         }
 
-        // performance measurement
         const chrono_ms loop_duration = chrono_clock::now() - loop_start_chrono;
+
+        // sleep if execution was faster than it should be based on tps and game speed
+        if (loop_duration.count() < target_ms) {
+//            std::cout << "loop took " << loop_duration.count() << "ms" << std::endl;
+            usleep((target_ms - loop_duration.count()) * 1000);
+        }
+
+        // performance measurement
         perf_measurement_duration_counter += loop_duration.count();
         perf_measurement_iterations_counter++;
         if (perf_measurement_iterations_counter == GAME_TPS * GAME_SPEED_MODIFIER) {

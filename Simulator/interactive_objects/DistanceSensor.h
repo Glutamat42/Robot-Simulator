@@ -22,7 +22,7 @@ public:
 
     double get_sensor_angle();
 
-    double get_sensor_max_distance();
+    [[maybe_unused]] double get_sensor_max_distance();
 
     double get_sensor_value();
 

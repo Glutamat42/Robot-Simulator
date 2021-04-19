@@ -5,11 +5,9 @@
 #include "Simulator/constants.h"
 #include "Simulator/RobotOperator.h"
 #include "Scenario/RobotArmy.h"
-#include "Scenario/TestRobots.h"
 #include <opencv2/opencv.hpp>
 #include <opencv2/core/core.hpp>
 #include <unistd.h>
-#include <random>
 
 using chrono_clock = std::chrono::system_clock;
 using chrono_ms = std::chrono::duration<double, std::milli>;
