@@ -18,7 +18,7 @@ protected:
     double standardDeviation;
 
 public:
-    inline SensorInterface(World* world, Robot* robot, double standardDeviation = 0.025) {
+    inline SensorInterface(World* world, Robot* robot, double standardDeviation = 1) {
         this->world = world;
         this->robot = robot;
         this->standardDeviation = standardDeviation * NOISE_MODIFIER;

@@ -27,7 +27,7 @@ Robot::Robot(std::string name,
     }
 
     if (!this->collision_detection_objects(world->get_objects()).empty()) {
-        std::cout << "failed" << std::endl;
+        throw std::invalid_argument("cant spawn in object");
     }
 }
 
@@ -46,9 +46,13 @@ Robot::Robot(std::string name, int radius, World *world, double max_angle, doubl
                 (rand() % (((int) world->get_map_bounds().x - radius) * 1000) / 1000) + radius / 2,
                 (rand() % (((int) world->get_map_bounds().y - radius) * 1000) / 1000) + radius / 2
         );
-        if (!this->collision_detection_map(&start_pos)) {
-            break;
+        if (this->collision_detection_map(&start_pos)) {
+            continue;
         }
+        if (!this->collision_detection_objects(world->get_objects()).empty()) {
+            continue;
+        }
+        break;
     }
 
     this->pos = start_pos;

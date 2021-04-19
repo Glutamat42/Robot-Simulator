@@ -53,20 +53,20 @@ void DistanceSensor::update_sensor_data() {
     this->sensor_data_value = -1;
 
     double distanceToCollision;
-    auto* pointOfCollision = dynamic_cast<WallPoint *>(this->collision_detection_map(nullptr, &distanceToCollision));
+    auto *pointOfCollision = dynamic_cast<WallPoint *>(this->collision_detection_map(nullptr, &distanceToCollision));
     if (pointOfCollision) {
         this->sensor_data_value = distanceToCollision;
     }
 
     // Object collision
-    std::vector<CollidableObject*> objectsWithoutMe;
-    for (CollidableObject* object : SensorInterface::world->get_objects()) {
+    std::vector<CollidableObject *> objectsWithoutMe;
+    for (CollidableObject *object : SensorInterface::world->get_objects()) {
         if (object != this->robot) {
             objectsWithoutMe.push_back(object);
         }
     }
     std::vector<CollisionData *> collidedObjects = collision_detection_objects(objectsWithoutMe);
-    for (CollisionData* collisionData : collidedObjects) {
+    for (CollisionData *collisionData : collidedObjects) {
         cv::Point2d distanceVector = collisionData->getPoint() - this->pos;
         double distance = sqrt(distanceVector.x * distanceVector.x + distanceVector.y * distanceVector.y);
         if (distance < this->sensor_data_value || this->sensor_data_value == -1) {
@@ -77,10 +77,9 @@ void DistanceSensor::update_sensor_data() {
     if (this->sensor_data_value != -1) {
         // add noise
         if (this->standardDeviation != 0) {
-//            double noise_multiplier = get_random_percentage(this->standardDeviation);
             std::random_device rd{};
             std::mt19937 gen{rd()};
-            std::normal_distribution<> d{0,this->standardDeviation};
+            std::normal_distribution<> d{0, this->standardDeviation / 100};
             this->sensor_data_value *= (1 + d(gen));
         }
     }
