@@ -52,10 +52,17 @@ CollidableRay::collision_detection_objects(std::vector<CollidableObject *> colli
                 std::vector<cv::Point2d> collisions = collision_detection_ray_circle(this,
                                                                                      static_cast<CollidableCircle *>(object));
                 if (!collisions.empty()) {
-//                    if (collisions.size() == 2) {
-//
-//                    }
-                    collided_with.push_back(new CollisionData(object, collisions.at(1)));
+                    int index = 0;
+                    if (collisions.size() == 2) {
+                        cv::Point2d diff0 = collisions[0] - *pos;
+                        cv::Point2d diff1 = collisions[1] - *pos;
+                        double d0 = diff0.x * diff0.x + diff0.y * diff0.y;
+                        double d1 = diff1.x * diff1.x + diff1.y * diff1.y;
+                        if (d1 < d0) {
+                            index = 1;
+                        }
+                    }
+                    collided_with.push_back(new CollisionData(object, collisions.at(index)));
                 }
                 break;
             }

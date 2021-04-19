@@ -17,8 +17,10 @@ double get_random_percentage(double in_range = 0.025);
  * @param c2
  * @return true if collision
  */
-std::optional<cv::Point2d> collision_detection_circle_circle(CollidableCircle *c1, CollidableCircle *c2, cv::Point2d* pos = nullptr);
+std::optional<cv::Point2d> collision_detection_circle_circle(CollidableCircle *c1, CollidableCircle *c2, cv::Point2d *pos = nullptr);
 
-std::vector<cv::Point2d>  collision_detection_ray_circle(CollidableRay *ray, CollidableCircle *circle);
+std::vector<cv::Point2d> collision_detection_ray_circle(CollidableRay *ray, CollidableCircle *circle, bool limitToLength = true) ;
+
+bool pointBetween(cv::Point2d p1, cv::Point2d p2, cv::Point2d px);
 
 #endif //MR_CPP_CODE_HELPERS_H

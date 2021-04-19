@@ -20,7 +20,7 @@ int main() {
 
 
 //    // init main test robot
-//    Robot r = Robot(std::string("r1"), 8, cv::Point2d(320.0, 50.0), 1.18 * M_PI, &world, M_PI / 3, 10);
+//    Robot r = Robot(std::string("r1"), 8, cv::Point2d(320.0, 40.0), 1.18 * M_PI, &world, M_PI / 3, 10);
 //    DistanceSensor s1 = DistanceSensor(&world, &r, 0.20 * M_PI, 200);
 //    DistanceSensor s2 = DistanceSensor(&world, &r, -0.20 * M_PI, 200);
 //    DistanceSensor s3 = DistanceSensor(&world, &r, 0.45 * M_PI, 200);
@@ -33,7 +33,7 @@ int main() {
 //
 //    RobotOperator ro = RobotOperator(&r);
 //
-//    Robot r2 = Robot(std::string("r2"), 8, cv::Point2d(280.0, 50.0), 0.2 * M_PI, &world, M_PI / 3, 10);
+//    Robot r2 = Robot(std::string("r2"), 8, cv::Point2d(280.0, 50.0), 0.15 * M_PI, &world, M_PI / 3, 10);
 //    DistanceSensor r2s1 = DistanceSensor(&world, &r2, 0.2*M_PI, 200);
 //    r2.add_sensor(&r2s1);
 //    DistanceSensor r2s2 = DistanceSensor(&world, &r2, -0.2*M_PI, 200);
@@ -50,18 +50,18 @@ int main() {
 //    cv::waitKey();
 //    sleep(5);
 //    cv::waitKey();
-    // END: init main test robot
+//    // END: init main test robot
 
     // init robot army
     std::vector<Robot*> robots;
     std::vector<RobotOperator*> robotOperators;
     std::vector<DistanceSensor*> sensors;
 
-    for (int i = 0; i < 25; ++i) {
+    for (int i = 0; i < 50; ++i) {
         Robot* robot = new Robot(std::string("robot_army_" + std::to_string(i)), 8, &world, M_PI / 3, 200);
-        DistanceSensor* sensor1 = new DistanceSensor(&world, robot, 0.2*M_PI, 199);
+        DistanceSensor* sensor1 = new DistanceSensor(&world, robot, 0.2*M_PI, 200);
         robot->add_sensor(sensor1);
-        DistanceSensor* sensor2 = new DistanceSensor(&world, robot, -0.2*M_PI, 198);
+        DistanceSensor* sensor2 = new DistanceSensor(&world, robot, -0.2*M_PI, 200);
         robot->add_sensor(sensor2);
         world.add_object(robot);
         RobotOperator* robotOperator = new RobotOperator(robot);
@@ -98,6 +98,8 @@ int main() {
 
 //        ro.update();
 //        ro2.update();
+
+
         for (RobotOperator* robotOperator: robotOperators) {
             robotOperator->update();
         }
@@ -105,6 +107,12 @@ int main() {
         for (Robot* robot: world.get_robots()) {
             robot->update();
         }
+
+        // sensor data has to be updated after everything else
+        for (SensorInterface* sensor : sensors) {
+            sensor->update_sensor_data();
+        }
+
         world.show_map();
 
         // simple pause function
@@ -122,13 +130,7 @@ int main() {
 
 
         const chrono_ms loop_duration = chrono_clock::now() - loop_start_chrono;
-        if (loop_duration.count() < target_ms) {
-//            std::cout << "loop took " << loop_duration.count() << "ms" << std::endl;
-            usleep((target_ms - loop_duration.count()) * 1000);
-        } else {
-            std::cout << "loop took " << loop_duration.count() << "ms; TPS: " << real_tps << "instead of target TPS: "
-                      << TARGET_TPS << std::endl;
-        }
+
         perf_measurement_duration_counter += loop_duration.count();
         perf_measurement_iterations_counter++;
         if (perf_measurement_iterations_counter == GAME_TPS * GAME_SPEED_MODIFIER) {

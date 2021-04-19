@@ -27,7 +27,14 @@ std::optional<cv::Point2d> collision_detection_circle_circle(CollidableCircle *c
     return {};
 }
 
-std::vector<cv::Point2d> collision_detection_ray_circle(CollidableRay *ray, CollidableCircle *circle) {
+/**
+ *
+ * @param ray
+ * @param circle
+ * @param limitToLength if true: will only return points between start end endpoint
+ * @return
+ */
+std::vector<cv::Point2d> collision_detection_ray_circle(CollidableRay *ray, CollidableCircle *circle, bool limitToLength) {
     cv::Point2d x1 = ray->get_position() - circle->get_position();
     cv::Point2d x2 = ray->getEndPoint() - circle->get_position();
 
@@ -49,5 +56,31 @@ std::vector<cv::Point2d> collision_detection_ray_circle(CollidableRay *ray, Coll
         ip.push_back(cv::Point2d(D * dv.y - copysign(1.0, dv.y) * dv.x * t, -D * dv.x - abs(dv.y) * t) / (dr * dr) +
                      (circle->get_position()));
     }
+
+    if (limitToLength) {
+        std::vector<cv::Point2d> ip_between_points;
+
+        for (cv::Point2d point : ip) {
+            if (pointBetween(ray->get_position(),ray->getEndPoint(), point)) {
+                ip_between_points.push_back(point);
+            }
+        }
+
+        ip = ip_between_points;
+    }
+
     return ip;
+}
+
+bool pointBetween(cv::Point2d p1, cv::Point2d p2, cv::Point2d px) {
+    cv::Point2d vec_p1_p2 = p1 - p2;
+    double mag_p1_p2 = vec_p1_p2.x * vec_p1_p2.x + vec_p1_p2.y * vec_p1_p2.y;
+
+    cv::Point2d vec_p1_px = p1 - px;
+    double mag_p1_px = vec_p1_px.x * vec_p1_px.x + vec_p1_px.y * vec_p1_px.y;
+
+    cv::Point2d vec_p2_px = p2 - px;
+    double mag_p2_px = vec_p2_px.x * vec_p2_px.x + vec_p2_px.y * vec_p2_px.y;
+
+    return (mag_p1_px < mag_p1_p2 && mag_p2_px < mag_p1_p2);
 }

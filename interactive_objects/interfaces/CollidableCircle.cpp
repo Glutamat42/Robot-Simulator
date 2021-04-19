@@ -51,7 +51,7 @@ CollidableCircle::collision_detection_objects(std::vector<CollidableObject *> co
                                                                                          static_cast<CollidableCircle *>(object),
                                                                                          pos);
                 if (collision) {
-                    std::cout << "Collision with circle detected" << std::endl;
+//                    std::cout << "Collision with circle detected" << std::endl;
                     collided_with.push_back(new CollisionData(this, collision.value()));
                 }
                 break;

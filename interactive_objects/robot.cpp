@@ -157,9 +157,12 @@ void Robot::update() {
     );
 
     // update sensors
-    for (SensorInterface *sensor : this->sensors) {
-        sensor->update_sensor_data();
-    }
+    // Updating them here causes some issues because that way the sensor update happens robot after robot. At the end of
+    // the loop some robots will have moved since this sensor update. This can result in ugly situation where
+    // (eg) a sensor ray goes through a robot because that robot updated its position after the sensor was updated.
+//    for (SensorInterface *sensor : this->sensors) {
+//        sensor->update_sensor_data();
+//    }
 }
 
 void Robot::draw_robot(cv::Mat image) {
@@ -177,7 +180,7 @@ std::string Robot::get_name() {
 }
 
 void Robot::handleCollision(CollidableObject *object) {
-    std::cout << this->name << ": Collision detected" << std::endl;
+//    std::cout << this->name << ": Collision detected" << std::endl;
 }
 
 double Robot::get_radius() {
