@@ -11,9 +11,9 @@
 
 class CollidableCircle : public CollidableObject {
 protected:
-    WallPoint * collision_detection_map(cv::Point2d pos);
+    WallPoint * collision_detection_map(cv::Point2d* pos);
 
-    std::vector<CollidableObject *> collision_detection_objects(std::vector<CollidableObject *> collidableObjects, cv::Point2d* pos = nullptr);
+    std::vector<CollisionData *> collision_detection_objects(std::vector<CollidableObject *> collidableObjects, cv::Point2d* pos = nullptr);
 
     double radius;
 

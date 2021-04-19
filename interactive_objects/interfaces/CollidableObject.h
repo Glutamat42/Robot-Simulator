@@ -7,23 +7,24 @@
 
 #include <vector>
 
+class CollisionData;
 class World;
 
 enum class CollidableObjectType {
-    circle, point
+    circle, point, ray
 };
 
 class CollidableObject {
 protected:
     CollidableObjectType objectType;
 
-    virtual CollidableObject * collision_detection_map(cv::Point2d pos) = 0;
+    virtual CollidableObject * collision_detection_map(cv::Point2d* pos = nullptr) = 0;
 
-    virtual std::vector<CollidableObject *> collision_detection_objects(std::vector<CollidableObject *> collidableObjects, cv::Point2d* pos = nullptr) = 0;
+    virtual std::vector<CollisionData *>
+    collision_detection_objects(std::vector<CollidableObject *> collidableObjects, cv::Point2d* pos = nullptr) = 0;
 
-    World *world;
+    World* world;
 public:
-//    virtual ~CollidableObject() = 0;
 
     CollidableObjectType getObjectType() {
         return this->objectType;
@@ -32,6 +33,5 @@ public:
     virtual void handleCollision(CollidableObject *object) = 0;
 };
 
-//CollidableObject::~CollidableObject() {}
 
 #endif //MR_CPP_CODE_COLLIDABLEOBJECT_H

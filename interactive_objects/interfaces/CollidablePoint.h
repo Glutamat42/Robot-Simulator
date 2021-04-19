@@ -9,16 +9,19 @@
 #include <iostream>
 #include "CollidableObject.h"
 
+/** THIS CLASS IS NOT FULLY IMPLEMENTED AND NOT FULLY SUPPORTED ELSEWHERE
+ *
+ */
 class CollidablePoint : public CollidableObject {
 protected:
-    CollidableObject * collision_detection_map(cv::Point2d pos) {
+    CollidableObject * collision_detection_map(cv::Point2d* pos) {
         std::cout << "Currently not implemented because the point object is only used for non interactive walls" << std::endl;
         return nullptr;
     };
 
-    std::vector<CollidableObject *> collision_detection_objects(std::vector<CollidableObject *> collidableObjects, cv::Point2d* pos = nullptr) {
+    std::vector<CollisionData *> collision_detection_objects(std::vector<CollidableObject *> collidableObjects, cv::Point2d* pos = nullptr) {
         std::cout << "Currently not implemented because the point object is only used for non interactive walls" << std::endl;
-        return std::vector<CollidableObject *>();
+        return std::vector<CollisionData *>();
     }
 
     cv::Point2d pos;

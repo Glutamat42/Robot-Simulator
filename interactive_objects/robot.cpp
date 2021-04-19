@@ -6,6 +6,7 @@
 #include "../world.h"
 #include "../constants.h"
 #include "../helpers.h"
+#include "CollisionData.h"
 
 Robot::Robot(std::string name,
              int radius,
@@ -22,7 +23,7 @@ Robot::Robot(std::string name,
     this->max_angle = max_angle;
     this->max_speed = max_speed;
 
-    if (this->collision_detection_map(this->pos)) {
+    if (this->collision_detection_map(&this->pos)) {
         throw std::invalid_argument("cant spawn in wall");
     }
 
@@ -46,7 +47,7 @@ Robot::Robot(std::string name, int radius, World *world, double max_angle, doubl
                 (rand() % (((int) world->get_map_bounds().x - radius) * 1000) / 1000) + radius / 2,
                 (rand() % (((int) world->get_map_bounds().y - radius) * 1000) / 1000) + radius / 2
         );
-        if (!this->collision_detection_map(start_pos)) {
+        if (!this->collision_detection_map(&start_pos)) {
             break;
         }
     }
@@ -130,18 +131,18 @@ void Robot::update() {
         );
 
         // check map collision
-        WallPoint* collidedWallPoint = this->collision_detection_map(currentCheckPoint);
+        WallPoint* collidedWallPoint = this->collision_detection_map(&currentCheckPoint);
         if (collidedWallPoint) {
             this->handleCollision(collidedWallPoint);
             break;
         }
 
         // check object collision
-        std::vector<CollidableObject *> collidedObjects = this->collision_detection_objects(world->get_objects(), &currentCheckPoint);
+        std::vector<CollisionData *> collidedObjects = this->collision_detection_objects(world->get_objects(), &currentCheckPoint);
         if (!collidedObjects.empty()) {
-            for (CollidableObject *object : collidedObjects) {
-                object->handleCollision(this);
-                this->handleCollision(object);
+            for (CollisionData *object : collidedObjects) {
+                object->getObject()->handleCollision(this);
+                this->handleCollision(object->getObject());
             }
             break;
         }

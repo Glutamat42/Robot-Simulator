@@ -8,17 +8,17 @@
 
 #include "../world.h"
 #include "../interfaces/SensorInterface.h"
+#include "interfaces/CollidableRay.h"
 
-class DistanceSensor : public SensorInterface {
+class DistanceSensor : public CollidableRay, public SensorInterface {
 private:
     double sensor_angle;
-    double sensor_max_distance;
 
     double sensor_data_value;
     cv::Point2d sensor_data_abs_position;
     cv::Point2d sensor_data_dxy;
 public:
-    DistanceSensor(World* world, Robot* robot, double sensor_angle, double sensor_distance);
+    DistanceSensor(World *world, Robot *robot, double sensor_angle, double sensor_distance);
 
     double get_sensor_angle();
 
@@ -31,6 +31,8 @@ public:
     void update_sensor_data() override;
 
     void draw_sensor_data(cv::Mat image) override;
+
+    void handleCollision(CollidableObject *object) override;
 };
 
 
