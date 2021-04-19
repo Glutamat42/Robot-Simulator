@@ -4,6 +4,7 @@
 
 #include <unistd.h>
 #include "TestRobots.h"
+#include "../Operators/BasicWithNovelty.h"
 
 void TestRobots::setUp() {
     this->world = new World("assets/maps/world1.png");
@@ -19,7 +20,7 @@ void TestRobots::setUp() {
     r.add_sensor(&s3);
     r.add_sensor(&s4);
     world->add_object(&r);
-    RobotOperator ro = RobotOperator(&r);
+    RobotOperator* ro = new BasicWithNovelty(&r);
 
     // robot 2
     Robot r2 = Robot(std::string("r2"), 8, cv::Point2d(280.0, 50.0), 0.15 * M_PI, world, M_PI / 3, 10);
@@ -28,7 +29,19 @@ void TestRobots::setUp() {
     DistanceSensor r2s2 = DistanceSensor(world, &r2, -0.2*M_PI, 200);
     r2.add_sensor(&r2s2);
     world->add_object(&r2);
-    RobotOperator ro2 = RobotOperator(&r2);
+    RobotOperator* ro2 = new BasicWithNovelty(&r2);
+
+
+    sensors.push_back(&s1);
+    sensors.push_back(&s2);
+    sensors.push_back(&s3);
+    sensors.push_back(&s4);
+    sensors.push_back(&r2s1);
+    sensors.push_back(&r2s2);
+    robots.push_back(&r);
+    robots.push_back(&r2);
+    robotOperators.push_back(ro);
+    robotOperators.push_back(ro2);
 
 
     world->show_map();

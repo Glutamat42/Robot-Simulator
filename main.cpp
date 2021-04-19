@@ -3,7 +3,7 @@
 #include "Simulator/interactive_objects/robot.h"
 #include "Simulator/interactive_objects/DistanceSensor.h"
 #include "Simulator/constants.h"
-#include "Simulator/RobotOperator.h"
+#include "Operators/RobotOperator.h"
 #include "Scenario/RobotArmy.h"
 #include <opencv2/opencv.hpp>
 #include <opencv2/core/core.hpp>

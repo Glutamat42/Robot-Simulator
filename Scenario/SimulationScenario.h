@@ -8,7 +8,7 @@
 
 #include <vector>
 #include "../Simulator/interactive_objects/robot.h"
-#include "../Simulator/RobotOperator.h"
+#include "../Operators/RobotOperator.h"
 #include "../Simulator/interactive_objects/DistanceSensor.h"
 
 class SimulationScenario {

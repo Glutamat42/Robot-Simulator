@@ -3,6 +3,7 @@
 //
 
 #include "RobotArmy.h"
+#include "../Operators/BasicWithNovelty.h"
 
 void RobotArmy::setUp() {
     this->world = new World("assets/maps/world1.png");
@@ -16,7 +17,7 @@ void RobotArmy::setUp() {
         robot->add_sensor(sensor1);
         robot->add_sensor(sensor2);
 
-        RobotOperator* robotOperator = new RobotOperator(robot);
+        RobotOperator* robotOperator = new BasicWithNovelty(robot);
 
         sensors.push_back(sensor1);
         sensors.push_back(sensor2);

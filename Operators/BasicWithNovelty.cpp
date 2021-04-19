@@ -1,19 +1,17 @@
 //
-// Created by markus on 05.04.21.
+// Created by markus on 20.04.21.
 //
 
-#include "RobotOperator.h"
-#include "constants.h"
+#include "BasicWithNovelty.h"
+#include "../Simulator/constants.h"
 
-RobotOperator::RobotOperator(RobotControlInterface *robot) {
-    this->robot = robot;
-
+BasicWithNovelty::BasicWithNovelty(RobotControlInterface *robot) : RobotOperator(robot) {
     this->robot->set_speed(150);
 
     this->distance_sensor_history.reserve(distance_sensor_history_size);
 }
 
-void RobotOperator::update() {
+void BasicWithNovelty::update() {
     if (unstucking) {
         if (this->robot->get_target_turn_angle() == 0) {
             this->unstucking = false;
@@ -44,16 +42,7 @@ void RobotOperator::update() {
             worst_sensor->get_sensor_angle() * -1 * 50 * (1 / worst_sensor->get_simplified_sensor_value()));
 }
 
-std::vector<DistanceSensor *> RobotOperator::filter_for_distance_sensor(std::vector<SensorInterface *> sensors) {
-    std::vector<DistanceSensor *> distance_sensors;
-    for (SensorInterface *sensor: sensors) {
-        DistanceSensor *casted_sensor = dynamic_cast<DistanceSensor *>(sensor);
-        if (casted_sensor) distance_sensors.push_back(casted_sensor);
-    }
-    return distance_sensors;
-}
-
-bool RobotOperator::novelty_detection() {
+bool BasicWithNovelty::novelty_detection() {
     std::vector<DistanceSensor *> distance_sensors = this->filter_for_distance_sensor(this->robot->get_sensors());
 
     // create vector containing sensor values
