@@ -32,6 +32,12 @@ public:
     virtual double get_speed() = 0;
 
     virtual std::string get_name() = 0;
+
+    virtual double get_last_tick_movement_distance() = 0;
+
+    virtual double get_last_tick_movement_angle() = 0;
+
+    virtual double get_max_turn_rate() = 0;
 };
 
 #endif //MR_CPP_CODE_ROBOTCONTROLINTERFACE_H

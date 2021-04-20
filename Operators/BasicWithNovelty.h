@@ -14,7 +14,7 @@
 class BasicWithNovelty : public RobotOperator {
 protected:
     int distance_sensor_history_index = 0;
-    int distance_sensor_history_size = (int) (100 * GAME_TPS);
+    int distance_sensor_history_size = (int) (50 * GAME_TPS);
     std::vector<std::vector<int>> distance_sensor_history;
     int novelty_score = 0;
     int novelty_weight = 0;
