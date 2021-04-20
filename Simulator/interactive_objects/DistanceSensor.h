@@ -28,7 +28,7 @@ public:
 
     double get_simplified_sensor_value();
 
-    void update_sensor_data() override;
+    void update_sensor_data(bool disable_object_collision_detection) override;
 
     void draw_sensor_data(cv::Mat image) override;
 

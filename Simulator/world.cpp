@@ -9,11 +9,12 @@
  *
  * @param map_filename filename
  */
-World::World(std::string map_filename) {
+World::World(std::string map_filename, std::string windowNameAppendix) {
     this->map = cv::imread(map_filename);
     if ((this->map.cols == 0) || (this->map.rows == 0)) {
         throw std::invalid_argument("Error! Could not read the image file: '" + map_filename + "'");
     }
+    this->windowNameAppendix = windowNameAppendix;
 }
 
 /** checks for collision of a point
@@ -50,7 +51,7 @@ void World::show_map() {
         }
     }
 
-    cv::imshow(SIMULATOR_WINDOW_NAME, image);
+    cv::imshow(SIMULATOR_WINDOW_NAME + " - " + this->windowNameAppendix, image);
 }
 
 void World::add_object(CollidableObject *object) {
@@ -75,4 +76,8 @@ std::vector<Robot *> World::get_robots() {
 //        if (casted_sensor) distance_sensors.push_back(casted_sensor);
 //    }
 //    return distance_sensors;
+}
+
+void World::clearObjectsList() {
+    this->objects.clear();
 }

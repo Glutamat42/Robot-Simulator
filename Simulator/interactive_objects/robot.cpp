@@ -58,6 +58,13 @@ Robot::Robot(std::string name, int radius, World *world, double max_angle, doubl
     this->pos = start_pos;
 }
 
+Robot::Robot(std::string name, int radius, cv::Point2d start_pos, double start_orientation) {
+    this->name = name;
+    this->radius = radius;
+    this->pos = start_pos;
+    this->orientation = start_orientation;
+}
+
 double Robot::get_orientation() {
     return this->orientation;
 }
@@ -89,21 +96,24 @@ void Robot::set_speed(double speed) {
 
 
 void Robot::update() {
+    if (!this->world) {
+        throw std::logic_error("No world set, cant update!");
+    }
+
     double desired_turn_angle = this->move_angle / GAME_TPS;
     double desired_move_distance = this->move_speed / GAME_TPS;
 
     // if target turn angle is set
-    if (move_target_turn_angle != 0) {
-        if (abs(desired_turn_angle) > abs(move_target_turn_angle)) {
+    if (this->move_target_turn_angle != 0) {
+        if (abs(desired_turn_angle) > abs(this->move_target_turn_angle)) {
             // finished turning for given angle (after this step)
-            desired_turn_angle = move_target_turn_angle;
+            desired_turn_angle = this->move_target_turn_angle;
             this->move_angle = 0;
         }
-        if (desired_turn_angle * move_target_turn_angle >=
-            0) { // both values have the same sign or desired_turn_angle is 0
-            move_target_turn_angle -= desired_turn_angle;
+        if (desired_turn_angle * this->move_target_turn_angle >= 0) { // both values have the same sign or desired_turn_angle is 0
+            this->move_target_turn_angle -= desired_turn_angle;
         } else {
-            move_target_turn_angle += desired_turn_angle;
+            this->move_target_turn_angle += desired_turn_angle;
         }
     }
 
@@ -159,6 +169,11 @@ void Robot::update() {
             dy * last_collision_free_distance + this->pos.y
     );
 
+    // save moved distance and angle
+    // TODO: maybe implement measurement errors (standard deviation)
+    this->last_tick_movement_angle = desired_turn_angle;
+    this->last_tick_movement_distance = last_collision_free_distance;
+
     // update sensors
     // Updating them here causes some issues because that way the sensor update happens robot after robot. At the end of
     // the loop some robots will have moved since this sensor update. This can result in ugly situation where
@@ -188,4 +203,8 @@ void Robot::handleCollision(CollidableObject *object) {
 
 double Robot::get_radius() {
     return this->radius;
+}
+
+double Robot::get_max_turn_rate() {
+    return this->max_angle;
 }

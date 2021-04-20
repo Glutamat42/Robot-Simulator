@@ -21,4 +21,8 @@ std::vector<cv::Point2d> collision_detection_ray_circle(CollidableRay *ray, Coll
 
 bool pointBetween(cv::Point2d p1, cv::Point2d p2, cv::Point2d px);
 
+template <typename T> int sgn(T val) {
+    return (T(0) < val) - (val < T(0));
+}
+
 #endif //MR_CPP_CODE_HELPERS_H

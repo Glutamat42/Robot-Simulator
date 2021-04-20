@@ -5,6 +5,8 @@
 #include "Simulator/constants.h"
 #include "Operators/RobotOperator.h"
 #include "Scenario/RobotArmy.h"
+#include "Scenario/ParticleScenario.h"
+#include "Scenario/TestRobots.h"
 #include <opencv2/opencv.hpp>
 #include <opencv2/core/core.hpp>
 #include <unistd.h>
@@ -17,7 +19,8 @@ int main() {
     srand(time(NULL));
 
 //    SimulationScenario* scenario = new TestRobots();
-    SimulationScenario* scenario = new RobotArmy();
+//    SimulationScenario* scenario = new RobotArmy();
+    SimulationScenario* scenario = new ParticleScenario();
     scenario->setUp();
     scenario->startLoop();
 

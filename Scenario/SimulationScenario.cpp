@@ -13,7 +13,6 @@ void SimulationScenario::startLoop() {
     // Begin game loop stuff
     const double TARGET_TPS = GAME_TPS * GAME_SPEED_MODIFIER; // This is the real tps we want to reach and depends on the game speed modifier. For all ingame calculations just GAME_TPS is used
     const double target_ms = 1000 / GAME_TPS / GAME_SPEED_MODIFIER;
-    const double real_tps = 1000 / target_ms;
 
     // log some configs
     std::cout << "Game TPS: " << GAME_TPS << " Game speed modifier: " << GAME_SPEED_MODIFIER << " resulting in target tps of: " << TARGET_TPS << std::endl;
@@ -37,7 +36,7 @@ void SimulationScenario::startLoop() {
 
         // sensor data has to be updated after everything else
         for (SensorInterface* sensor : sensors) {
-            sensor->update_sensor_data();
+            sensor->update_sensor_data(false);
         }
 
         world->show_map();

@@ -27,6 +27,9 @@ private:
     double move_target_turn_angle = 0; // will set_target_turn_angle for this angle and then stop turning
     std::vector<SensorInterface *> sensors;
 
+    double last_tick_movement_distance = 0;
+    double last_tick_movement_angle = 0;
+
 
 public:
     Robot(std::string name, int radius, cv::Point2d start_pos, double start_orientation, World *world,
@@ -34,11 +37,19 @@ public:
 
     Robot(std::string name, int radius, World *world, double max_angle = M_PI / 6, double max_speed = 50.0);
 
+    /** This constructor allows creation of dummy robots (eg for particle filter visualization)
+     * Robots created using this constructor wont be able to use their update method and no collision
+     * detection will run, allowing to place robots inside walls.
+     *
+     * TODO: It might be better to create a separate DummyRobot class for this purpose which allows "moving" robots and things like that
+     */
+    Robot(std::string name, int radius, cv::Point2d start_pos, double start_orientation);
+
     std::string get_name() override;
 
     double get_radius();
 
-    void handleCollision(CollidableObject* object) override;
+    void handleCollision(CollidableObject *object) override;
 
     double get_orientation();
 
@@ -79,7 +90,7 @@ public:
     void set_turn_speed(double angle) override;
 
     double get_turn_speed() override {
-        return this-> move_angle;
+        return this->move_angle;
     }
 
     void set_speed(double speed) override;
@@ -91,6 +102,12 @@ public:
     void update();
 
     void draw_robot(cv::Mat image);
+
+    double get_last_tick_movement_distance() override { return this->last_tick_movement_distance; }
+
+    double get_last_tick_movement_angle() override { return this->last_tick_movement_angle; }
+
+    double get_max_turn_rate();
 };
 
 #endif //MR_CPP_CODE_ROBOT_H

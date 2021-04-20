@@ -30,13 +30,13 @@ double DistanceSensor::get_sensor_value() {
     return this->sensor_data_value;
 }
 
-void DistanceSensor::update_sensor_data() {
+void DistanceSensor::update_sensor_data(bool disable_object_collision_detection) {
     // update sensor angle (in case robot turned)
     this->angle = this->robot->get_orientation() + this->sensor_angle;
 
 
     // calculate exact sensor location
-    // abs. sensor angle relative to world
+    // abs. sensor angle relative to particles_world
     double sensor_dx = cos(this->angle);
     double sensor_dy = sin(this->angle);
     this->sensor_data_dxy = cv::Point2d(sensor_dx, sensor_dy);
@@ -59,23 +59,25 @@ void DistanceSensor::update_sensor_data() {
     }
 
     // Object collision
-    std::vector<CollidableObject *> objectsWithoutMe;
-    for (CollidableObject *object : SensorInterface::world->get_objects()) {
-        if (object != this->robot) {
-            objectsWithoutMe.push_back(object);
+    if (!disable_object_collision_detection) {
+        std::vector<CollidableObject *> objectsWithoutMe;
+        for (CollidableObject *object : SensorInterface::world->get_objects()) {
+            if (object != this->robot) {
+                objectsWithoutMe.push_back(object);
+            }
         }
-    }
-    std::vector<CollisionData *> collidedObjects = collision_detection_objects(objectsWithoutMe);
-    for (CollisionData *collisionData : collidedObjects) {
-        cv::Point2d distanceVector = collisionData->getPoint() - this->pos;
-        double distance = sqrt(distanceVector.x * distanceVector.x + distanceVector.y * distanceVector.y);
-        if (distance < this->sensor_data_value || this->sensor_data_value == -1) {
-            this->sensor_data_value = distance;
+        std::vector<CollisionData *> collidedObjects = collision_detection_objects(objectsWithoutMe);
+        for (CollisionData *collisionData : collidedObjects) {
+            cv::Point2d distanceVector = collisionData->getPoint() - this->pos;
+            double distance = sqrt(distanceVector.x * distanceVector.x + distanceVector.y * distanceVector.y);
+            if (distance < this->sensor_data_value || this->sensor_data_value == -1) {
+                this->sensor_data_value = distance;
+            }
         }
     }
 
+    // add noise
     if (this->sensor_data_value != -1) {
-        // add noise
         if (this->standardDeviation != 0) {
             std::random_device rd{};
             std::mt19937 gen{rd()};

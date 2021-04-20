@@ -12,11 +12,14 @@ class World {
 private:
     cv::Mat map;
     std::vector<CollidableObject*> objects;
+    std::string windowNameAppendix;
 
 public:
-    World(std::string map_filename);
+    explicit World(std::string map_filename, std::string windowNameAppendix = "");
 
     std::vector<Robot*> get_robots();
+
+    void clearObjectsList();
 
     bool check_collision(cv::Point2d point);
 
