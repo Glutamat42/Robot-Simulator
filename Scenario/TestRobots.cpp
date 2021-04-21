@@ -52,4 +52,6 @@ void TestRobots::setUp() {
     cv::waitKey();
     sleep(5);
     cv::waitKey();
+
+    // this->init()
 }

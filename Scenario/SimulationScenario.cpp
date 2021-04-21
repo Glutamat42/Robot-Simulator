@@ -9,6 +9,15 @@
 using chrono_clock = std::chrono::system_clock;
 using chrono_ms = std::chrono::duration<double, std::milli>;
 
+void SimulationScenario::init() {
+    for (SensorInterface* sensor : sensors) {
+        sensor->update_sensor_data(false);
+    }
+
+    world->show_map();
+    cv::waitKey();
+}
+
 void SimulationScenario::startLoop() {
     // Begin game loop stuff
     const double TARGET_TPS = GAME_TPS * GAME_SPEED_MODIFIER; // This is the real tps we want to reach and depends on the game speed modifier. For all ingame calculations just GAME_TPS is used

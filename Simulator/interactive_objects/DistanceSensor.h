@@ -17,8 +17,10 @@ private:
     double sensor_data_value;
     cv::Point2d sensor_data_abs_position;
     cv::Point2d sensor_data_dxy;
+
+    bool disable_sensor_noise;
 public:
-    DistanceSensor(World *world, Robot *robot, double sensor_angle, double sensor_distance);
+    DistanceSensor(World *world, Robot *robot, double sensor_angle, double sensor_distance, bool disable_sensor_noise = false);
 
     double get_sensor_angle();
 

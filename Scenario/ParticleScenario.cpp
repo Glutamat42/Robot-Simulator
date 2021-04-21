@@ -10,6 +10,7 @@ void ParticleScenario::setUp() {
     this->world = new World(mapName);
 
     // robot 1
+//    Robot* r = new Robot(std::string("r1"), 8, cv::Point2d(320.0, 40.0), 1.18 * M_PI, world, M_PI / 2, 40);
     Robot* r = new Robot(std::string("r1"), 8, cv::Point2d(320.0, 40.0), 1.18 * M_PI, world, M_PI / 2, 40);
     DistanceSensor* s1 = new DistanceSensor(world, r, 0.15*M_PI, 200);
     DistanceSensor* s3 = new DistanceSensor(world, r, 0.25*M_PI, 200);
@@ -29,7 +30,5 @@ void ParticleScenario::setUp() {
     robots.push_back(r);
     robotOperators.push_back(ro);
 
-
-    world->show_map();
-    cv::waitKey();
+    this->init();
 }

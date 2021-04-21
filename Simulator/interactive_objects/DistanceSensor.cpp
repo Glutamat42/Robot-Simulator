@@ -6,12 +6,13 @@
 #include "DistanceSensor.h"
 #include "CollisionData.h"
 
-DistanceSensor::DistanceSensor(World *world, Robot *robot, double sensor_angle, double sensor_distance)
+DistanceSensor::DistanceSensor(World *world, Robot *robot, double sensor_angle, double sensor_distance, bool disable_sensor_noise)
         : SensorInterface(world, robot),
           CollidableRay(robot->get_orientation() + sensor_angle, sensor_distance) {
     CollidableRay::world = SensorInterface::world;
     this->robot = robot;
     this->sensor_angle = sensor_angle;
+    this->disable_sensor_noise = disable_sensor_noise;
 }
 
 double DistanceSensor::get_sensor_angle() {
@@ -78,7 +79,7 @@ void DistanceSensor::update_sensor_data(bool disable_object_collision_detection)
 
     // add noise
     if (this->sensor_data_value != -1) {
-        if (this->standardDeviation != 0) {
+        if (!this->disable_sensor_noise && this->standardDeviation != 0) {
             std::random_device rd{};
             std::mt19937 gen{rd()};
             std::normal_distribution<> d{0, this->standardDeviation / 100};

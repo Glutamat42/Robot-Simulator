@@ -18,6 +18,7 @@ protected:
     std::vector<RobotOperator*> robotOperators;
     std::vector<DistanceSensor*> sensors;
 public:
+    void init();
     virtual void setUp() = 0;
     void startLoop();
 };

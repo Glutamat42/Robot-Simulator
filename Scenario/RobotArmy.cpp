@@ -25,6 +25,5 @@ void RobotArmy::setUp() {
         robotOperators.push_back(robotOperator);
     }
 
-    world->show_map();
-    cv::waitKey();
+    this->init();
 }
