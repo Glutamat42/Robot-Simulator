@@ -5,7 +5,7 @@
 #include "CollidableRay.h"
 #include "../../constants.h"
 #include "../WallPoint.h"
-#include "../../world.h"
+#include "../../world/world.h"
 #include "../../helpers.h"
 #include "../CollisionData.h"
 

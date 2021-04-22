@@ -116,6 +116,8 @@ public:
     double get_last_tick_movement_angle() override { return this->last_tick_movement_angle; }
 
     double get_max_turn_rate() override;
+
+    double get_max_move_speed() override;
 };
 
 #endif //MR_CPP_CODE_ROBOT_H

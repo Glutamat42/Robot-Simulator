@@ -3,7 +3,7 @@
 //
 
 #include "robot.h"
-#include "../world.h"
+#include "../world/world.h"
 #include "../helpers.h"
 #include "CollisionData.h"
 
@@ -232,4 +232,8 @@ void Robot::setDrawOptions(cv::Scalar color, bool hideDirectionIndicator, int cu
     this->robotCircleColor = color;
     this->hideDirectionIndicator = hideDirectionIndicator;
     this->customDrawRadius = customRadius;
+}
+
+double Robot::get_max_move_speed() {
+    return this->max_speed;
 }

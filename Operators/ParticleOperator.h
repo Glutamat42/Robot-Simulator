@@ -7,6 +7,7 @@
 
 
 #include "RobotOperator.h"
+#include "../Simulator/world/MapLine.h"
 
 class ParticleOperator : public RobotOperator {
 private:
@@ -37,6 +38,9 @@ private:
 
     int iterationsCounter = 0;
     bool useRandomParticles = true;
+
+    std::vector<std::array<double, 3>> estimationHistory;
+    MapLine* mapLine = new MapLine();
 
     // The following values should be seen as constants for this operator. They might be changed in constructor for some special cases like benchmarking
     bool BENCHMARK_MODE = false;

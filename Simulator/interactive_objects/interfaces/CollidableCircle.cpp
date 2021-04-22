@@ -3,7 +3,7 @@
 //
 
 #include "CollidableCircle.h"
-#include "../../world.h"
+#include "../../world/world.h"
 #include "../../helpers.h"
 #include "../CollisionData.h"
 

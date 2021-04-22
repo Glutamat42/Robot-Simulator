@@ -1,5 +1,5 @@
 #include <iostream>
-#include "Simulator/world.h"
+#include "Simulator/world/world.h"
 #include "Simulator/interactive_objects/robot.h"
 #include "Simulator/interactive_objects/DistanceSensor.h"
 #include "Simulator/constants.h"

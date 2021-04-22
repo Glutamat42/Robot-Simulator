@@ -6,7 +6,7 @@
 #define MR_CPP_CODE_DISTANCESENSOR_H
 
 
-#include "../world.h"
+#include "../world/world.h"
 #include "../interfaces/SensorInterface.h"
 #include "interfaces/CollidableRay.h"
 

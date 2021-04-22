@@ -3,7 +3,7 @@
 //
 
 #include "world.h"
-#include "constants.h"
+#include "../constants.h"
 
 /**
  *
@@ -60,6 +60,10 @@ void World::show_map(bool hideSensors) {
         }
     }
 
+    for (MapObject* mapObject : this->mapObjects) {
+        mapObject->draw(image);
+    }
+
     cv::imshow(SIMULATOR_WINDOW_NAME + " - " + this->windowNameAppendix, image);
 }
 
@@ -101,4 +105,8 @@ void World::clearObjectsList(bool deletePointers) {
         }
     }
     this->objects.clear();
+}
+
+void World::addMapObject(MapObject* object) {
+    this->mapObjects.push_back(object);
 }

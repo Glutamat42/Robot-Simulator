@@ -14,8 +14,9 @@ using namespace std::chrono;
 
 ParticleOperator::ParticleOperator(RobotControlInterface *robot, std::string map_filename, bool benchmarkMode) : RobotOperator(robot) {
     this->BENCHMARK_MODE = benchmarkMode;
-    this->particles_world = new World(map_filename, "Particle filter");
     this->secondOperator = new BasicWithNovelty(robot);
+    this->particles_world = new World(map_filename, "Particle filter");
+    this->particles_world->addMapObject(this->mapLine);
 
     if (this->BENCHMARK_MODE) {
         this->INIT_N = 5000;
@@ -321,6 +322,21 @@ void ParticleOperator::update() {
 
     // calculate estimated position
     std::array<double, 3> estimatedParticle = weightedAverageParticle(updated_particles, updated_weights);
+
+    // estimate whether the prediction is probably already accurate and if yes, add to history, if not: clear history
+    // also visualize it on the map as a line
+    if (!this->estimationHistory.empty()) {
+        // TODO: replace this algorithm with a better one looking further in the past and calculate an uncertainty value
+        double maxAcceptableMovementDistance = pow(this->robot->get_max_move_speed() / GAME_TPS * 2.5, 2); // theoretically maximum possible movement distance * X as square to prevent requirement of sqrt
+        double distanceFromLastEstimation = pow(this->estimationHistory.back()[0] - estimatedParticle[0], 2) + pow(this->estimationHistory.back()[1] - estimatedParticle[1], 2);
+        if (distanceFromLastEstimation >= maxAcceptableMovementDistance) {
+            this->estimationHistory.clear();
+            this->mapLine->clearPoints();
+            std::cout << "location probably not yet found";
+        }
+    }
+    this->estimationHistory.push_back(estimatedParticle);
+    this->mapLine->addPoint(cv::Point2i((int)estimatedParticle[0], (int)estimatedParticle[1]));
 
     // show current particles with their weights and the estimated robot location
     // nice for visualization but will impact performance!
