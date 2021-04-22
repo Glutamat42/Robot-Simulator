@@ -29,7 +29,7 @@ public:
 
     std::vector<Robot *> get_robots();
 
-    void clearObjectsList();
+    void clearObjectsList(bool deletePointers = false);
 
     bool check_collision(cv::Point2d point);
 

@@ -12,9 +12,6 @@ class ParticleOperator : public RobotOperator {
 private:
     World *particles_world;
 
-//    bool update_turning = false;
-//    bool update_moving = false;
-
     RobotOperator *secondOperator;
 
     int stepsCounter = 0;

@@ -17,7 +17,9 @@ protected:
 
     std::vector<DistanceSensor*> filter_for_distance_sensor(std::vector<SensorInterface*> sensors);
 public:
-    RobotOperator(RobotControlInterface* robot);
+    explicit RobotOperator(RobotControlInterface* robot);
+
+    virtual ~RobotOperator() = default;
 
     virtual void update() = 0;
 };

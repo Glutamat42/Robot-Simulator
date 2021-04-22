@@ -26,7 +26,7 @@ CollidableObject *CollidableRay::collision_detection_map(cv::Point2d *pos, doubl
 
         if (this->world->check_collision(point)) {
             *distance = i;
-            return (new WallPoint(point));
+            return (new WallPoint(this->world, point));
         }
     }
     return nullptr;
@@ -72,4 +72,36 @@ CollidableRay::collision_detection_objects(std::vector<CollidableObject *> colli
     }
 
     return collided_with;
+}
+
+bool CollidableRay::collision_detection_map_bool(cv::Point2d *pos, double *distance) {
+//    auto *collisionObject = this->collision_detection_map(nullptr, distance);
+//    bool collisionHappened = collisionObject != nullptr;
+//    delete collisionObject;
+//    return collisionHappened;
+
+    // yep, this is duplicate code, but it is called very often and this variant is a little bit more efficient if the point of the collision is not required
+    if (!pos) {
+        pos = &this->pos;
+    }
+
+    double dx = cos(this->angle);
+    double dy = sin(this->angle);
+
+    for (double i = 0; i < this->length; i += CALCULATION_RESOLUTION) {
+        cv::Point2d point = cv::Point2d(pos->x + i * dx, pos->y + i * dy);
+
+        if (this->world->check_collision(point)) {
+            *distance = i;
+            return true;
+        }
+    }
+    return false;
+}
+
+bool CollidableRay::collision_detection_objects_bool(std::vector<CollidableObject *> collidableObjects, cv::Point2d *pos) {
+    std::vector<CollisionData *> collidedObjects = this->collision_detection_objects(collidableObjects, pos);
+    bool collisionHappened = !collidedObjects.empty();
+    for (auto d : collidedObjects) delete d;
+    return collisionHappened;
 }

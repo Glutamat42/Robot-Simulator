@@ -11,6 +11,11 @@
 
 class CollidableRay : public CollidableObject {
 protected:
+    /** start position */
+    cv::Point2d pos;
+    double angle;
+    double length;
+
     CollidableObject *collision_detection_map(cv::Point2d *pos = nullptr) override;
 
     /** Calculate point of collision and return distance over distance pointer
@@ -21,20 +26,16 @@ protected:
      */
     CollidableObject *collision_detection_map(cv::Point2d *pos = nullptr, double *distance = nullptr);
 
-    std::vector<CollisionData *>
-    collision_detection_objects(std::vector<CollidableObject *> collidableObjects, cv::Point2d *pos = nullptr);
+    // TODO: implement for all CollidableObjects
+    bool collision_detection_map_bool(cv::Point2d* pos = nullptr, double* distance = nullptr);
 
-    /** start position
-     *
-     */
-    cv::Point2d pos;
+    std::vector<CollisionData *> collision_detection_objects(std::vector<CollidableObject *> collidableObjects, cv::Point2d *pos = nullptr);
 
-    double angle;
-
-    double length;
+    // TODO: implement for all CollidableObjects
+    bool collision_detection_objects_bool(std::vector<CollidableObject *> collidableObjects, cv::Point2d *pos = nullptr);
 
 public:
-    CollidableRay(double angle, double length = 800) {
+    CollidableRay(World* world, double angle, double length = 800) : CollidableObject(world) {
         this->angle = angle;
         this->length = length;
         this->objectType = CollidableObjectType::ray;
@@ -44,7 +45,7 @@ public:
         return this->pos;
     };
 
-    [[maybe_unused]] double get_length() const {
+    double get_length() const {
         return this->length;
     }
 

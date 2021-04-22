@@ -14,6 +14,8 @@
  */
 class CollidablePoint : public CollidableObject {
 protected:
+    cv::Point2d pos;
+
     CollidableObject * collision_detection_map(cv::Point2d* pos) {
         std::cout << "Currently not implemented because the point object is only used for non interactive walls" << std::endl;
         return nullptr;
@@ -24,10 +26,8 @@ protected:
         return std::vector<CollisionData *>();
     }
 
-    cv::Point2d pos;
-
 public:
-    CollidablePoint() {
+    CollidablePoint(World* world) : CollidableObject(world) {
         this->objectType = CollidableObjectType::point;
     }
 

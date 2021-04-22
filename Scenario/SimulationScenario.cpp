@@ -91,3 +91,16 @@ void SimulationScenario::startLoop() {
     }
 #pragma clang diagnostic pop
 }
+
+SimulationScenario::~SimulationScenario() {
+    for (auto robot : this->robots) {
+        delete robot;
+    }
+    for (auto robotOperator : this->robotOperators) {
+        delete robotOperator;
+    }
+    for (auto sensor : this->sensors) {
+        delete sensor;
+    }
+
+}

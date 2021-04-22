@@ -24,6 +24,8 @@ public:
         this->standardDeviation = standardDeviation * NOISE_MODIFIER;
     };
 
+    virtual ~SensorInterface() = default;
+
     virtual void update_sensor_data(bool disable_object_collision_detection) = 0;
 
     virtual void draw_sensor_data(cv::Mat image) = 0;

@@ -87,6 +87,18 @@ std::vector<Robot *> World::get_robots() {
 //    return distance_sensors;
 }
 
-void World::clearObjectsList() {
+/** clear objects list
+ *
+ * @param deletePointers if true also delete the objects instead of only clearing the list.
+ */
+void World::clearObjectsList(bool deletePointers) {
+    if (deletePointers) {
+        for (Robot *robot : this->get_robots()) {
+            robot->clearSensorsList(true);
+        }
+        for (auto o : this->objects) {
+            delete o;
+        }
+    }
     this->objects.clear();
 }

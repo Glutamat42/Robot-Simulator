@@ -25,7 +25,7 @@ public:
 
     virtual void set_turn_speed(double angle) = 0;
 
-    [[maybe_unused]] virtual double get_turn_speed() = 0;
+    virtual double get_turn_speed() = 0;
 
     virtual void set_speed(double speed) = 0;
 

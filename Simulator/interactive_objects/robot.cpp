@@ -13,25 +13,26 @@ Robot::Robot(std::string name,
              double start_orientation,
              World *world,
              double max_angle,
-             double max_speed) {
+             double max_speed) : CollidableCircle(world) {
     this->name = name;
     this->radius = radius;
     this->pos = start_pos;
     this->orientation = start_orientation;
-    this->world = world;
     this->max_angle = max_angle;
     this->max_speed = max_speed;
 
+    // TODO: leaks memory, create a function returning a bool and deleting the temporary pointers
     if (this->collision_detection_map(&this->pos)) {
         throw std::invalid_argument("cant spawn in wall");
     }
 
+    // TODO: leaks memory, create a function returning a bool and deleting the temporary pointers
     if (!this->collision_detection_objects(world->get_objects()).empty()) {
         throw std::invalid_argument("cant spawn in object");
     }
 }
 
-Robot::Robot(std::string name, int radius, World *world, double max_angle, double max_speed) {
+Robot::Robot(std::string name, int radius, World *world, double max_angle, double max_speed) : CollidableCircle(world) {
     this->name = name;
     this->radius = radius;
     this->world = world;
@@ -46,9 +47,13 @@ Robot::Robot(std::string name, int radius, World *world, double max_angle, doubl
                 (rand() % (((int) world->get_map_bounds().x - radius) * 1000) / 1000) + radius / 2,
                 (rand() % (((int) world->get_map_bounds().y - radius) * 1000) / 1000) + radius / 2
         );
+
+        // TODO: leaks memory, create a function returning a bool and deleting the temporary pointers -> see CollidableRay
         if (this->collision_detection_map(&start_pos)) {
             continue;
         }
+
+        // TODO: leaks memory, create a function returning a bool and deleting the temporary pointers -> see CollidableRay
         if (!this->collision_detection_objects(world->get_objects()).empty()) {
             continue;
         }
@@ -58,7 +63,7 @@ Robot::Robot(std::string name, int radius, World *world, double max_angle, doubl
     this->pos = start_pos;
 }
 
-Robot::Robot(std::string name, int radius, cv::Point2d start_pos, double start_orientation) {
+Robot::Robot(std::string name, int radius, World* world, cv::Point2d start_pos, double start_orientation) : CollidableCircle(world) {
     this->name = name;
     this->radius = radius;
     this->pos = start_pos;
@@ -78,6 +83,15 @@ std::vector<SensorInterface *> Robot::get_sensors() {
     return this->sensors;
 }
 
+void Robot::clearSensorsList(bool deletePointers) {
+    if (deletePointers) {
+        for (SensorInterface *sensor : this->sensors) {
+            delete sensor;
+        }
+    }
+    this->sensors.clear();
+}
+
 void Robot::set_turn_speed(double angle) {
     if (abs(angle) > this->max_angle) {
         this->move_angle = copysign(1.0, angle) * this->max_angle;
@@ -86,6 +100,7 @@ void Robot::set_turn_speed(double angle) {
     }
 }
 
+
 void Robot::set_speed(double speed) {
     if (speed > this->max_speed) {
         this->move_speed = this->max_speed;
@@ -93,7 +108,6 @@ void Robot::set_speed(double speed) {
         this->move_speed = speed;
     }
 }
-
 
 void Robot::update() {
     if (!this->world) {
@@ -118,13 +132,13 @@ void Robot::update() {
     }
 
     // if target travel/move distance is set
-    if (move_target_distance != 0) {
-        if (abs(desired_move_distance) > abs(move_target_distance)) {
+    if (this->move_target_distance != 0) {
+        if (abs(desired_move_distance) > abs(this->move_target_distance)) {
             // finished moving for given distance (after this step)
-            desired_move_distance = move_target_distance;
+            desired_move_distance = this->move_target_distance;
             this->move_speed = 0;
         }
-        move_target_distance -= desired_move_distance;
+        this->move_target_distance -= desired_move_distance;
     }
 
     this->orientation = fmod((this->orientation + desired_turn_angle), (2 * M_PI));
@@ -147,8 +161,10 @@ void Robot::update() {
         WallPoint* collidedWallPoint = this->collision_detection_map(&currentCheckPoint);
         if (collidedWallPoint) {
             this->handleCollision(collidedWallPoint);
+            delete collidedWallPoint;
             break;
         }
+        delete collidedWallPoint;
 
         // check object collision
         std::vector<CollisionData *> collidedObjects = this->collision_detection_objects(world->get_objects(), &currentCheckPoint);
@@ -156,6 +172,7 @@ void Robot::update() {
             for (CollisionData *object : collidedObjects) {
                 object->getObject()->handleCollision(this);
                 this->handleCollision(object->getObject());
+                delete object;
             }
             break;
         }

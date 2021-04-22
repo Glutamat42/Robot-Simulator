@@ -104,7 +104,7 @@ void ParticleOperator::updateParticleSimulation(std::vector<std::array<double, 3
 
     // If weights are provided they will be visualized on the map. For the color scaling we have to know what the maximum probability of one particle is
     double maxWeight = 0;
-    double useCustomWeightColors = false;
+    bool useCustomWeightColors = false;
     if (!weights.empty()) {
         useCustomWeightColors = true;
         for (double weight : weights) {
@@ -113,12 +113,13 @@ void ParticleOperator::updateParticleSimulation(std::vector<std::array<double, 3
     }
 
     // create dummy robots representing the particles
-    this->particles_world->clearObjectsList();
+    this->particles_world->clearObjectsList(true);
     for (int i = 0; i < particles.size(); ++i) {
         std::array<double, 3> particle = particles[i];
         // TODO: creating a dummyRobot class would allow updating existing robots. This would allow to avoid recreating everything all the times
         Robot *dummyRobot = new Robot("particle",
                                       this->robot->get_radius(),
+                                      this->particles_world,
                                       cv::Point2d(particle[0], particle[1]),
                                       particle[2]);
         // create sensors
@@ -282,7 +283,7 @@ void ParticleOperator::update() {
     }
     this->iterationsCounter++;
 
-
+    // using another operator for the actual movement, so this one can focus on particle filter
     this->secondOperator->update();
 
     // Partial implementation of steps accumulation. It might be that the algorithm works better if there is more movement between steps.
@@ -324,7 +325,7 @@ void ParticleOperator::update() {
     // show current particles with their weights and the estimated robot location
     // nice for visualization but will impact performance!
     this->updateParticleSimulation(updated_particles, false, updated_weights);
-    Robot *estimatedRobot = new Robot("estimation", 8, cv::Point2d(estimatedParticle[0], estimatedParticle[1]), estimatedParticle[2]);
+    Robot *estimatedRobot = new Robot("estimation", 8, this->particles_world, cv::Point2d(estimatedParticle[0], estimatedParticle[1]), estimatedParticle[2]);
     estimatedRobot->setDrawOptions(CV_RGB(255, 255, 255));
     this->particles_world->add_object(estimatedRobot);
     this->particles_world->show_map(true);

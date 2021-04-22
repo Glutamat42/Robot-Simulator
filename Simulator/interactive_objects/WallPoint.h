@@ -12,7 +12,7 @@
  */
 class WallPoint : public CollidablePoint {
 public:
-    WallPoint(cv::Point2d pos);
+    WallPoint(World* world, cv::Point2d pos);
 
     void handleCollision(CollidableObject* object) {
         std::cout << "Wall: Collision detected" << std::endl;

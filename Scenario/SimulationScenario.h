@@ -18,6 +18,8 @@ protected:
     std::vector<RobotOperator *> robotOperators;
     std::vector<DistanceSensor *> sensors;
 public:
+    virtual ~SimulationScenario();
+
     void init(bool pause = false);
 
     virtual void setUp() = 0;

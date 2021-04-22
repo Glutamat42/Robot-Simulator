@@ -8,8 +8,7 @@
 
 DistanceSensor::DistanceSensor(World *world, Robot *robot, double sensor_angle, double sensor_distance, bool disable_sensor_noise)
         : SensorInterface(world, robot),
-          CollidableRay(robot->get_orientation() + sensor_angle, sensor_distance) {
-    CollidableRay::world = SensorInterface::world;
+          CollidableRay(world, robot->get_orientation() + sensor_angle, sensor_distance) {
     this->robot = robot;
     this->sensor_angle = sensor_angle;
     this->disable_sensor_noise = disable_sensor_noise;
@@ -54,8 +53,7 @@ void DistanceSensor::update_sensor_data(bool disable_object_collision_detection)
     this->sensor_data_value = -1;
 
     double distanceToCollision;
-    auto *pointOfCollision = dynamic_cast<WallPoint *>(this->collision_detection_map(nullptr, &distanceToCollision));
-    if (pointOfCollision) {
+    if (this->collision_detection_map_bool(nullptr, &distanceToCollision)) {
         this->sensor_data_value = distanceToCollision;
     }
 
@@ -74,6 +72,7 @@ void DistanceSensor::update_sensor_data(bool disable_object_collision_detection)
             if (distance < this->sensor_data_value || this->sensor_data_value == -1) {
                 this->sensor_data_value = distance;
             }
+            delete collisionData;
         }
     }
 

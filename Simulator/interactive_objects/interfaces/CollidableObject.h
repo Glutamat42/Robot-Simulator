@@ -17,15 +17,19 @@ enum class CollidableObjectType {
 
 class CollidableObject {
 protected:
+    World *world;
     CollidableObjectType objectType;
 
-    [[maybe_unused]] virtual CollidableObject *collision_detection_map(cv::Point2d *pos = nullptr) = 0;
+    virtual CollidableObject *collision_detection_map(cv::Point2d *pos = nullptr) = 0;
 
-    virtual std::vector<CollisionData *>
-    collision_detection_objects(std::vector<CollidableObject *> collidableObjects, cv::Point2d *pos = nullptr) = 0;
-
-    World *world;
+    virtual std::vector<CollisionData *> collision_detection_objects(std::vector<CollidableObject *> collidableObjects, cv::Point2d *pos = nullptr) = 0;
 public:
+    CollidableObject(World* world) {
+        this->world = world;
+    }
+
+    virtual ~CollidableObject() {};
+
     CollidableObjectType getObjectType() {
         return this->objectType;
     }

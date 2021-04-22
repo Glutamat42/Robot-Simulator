@@ -4,6 +4,6 @@
 
 #include "WallPoint.h"
 
-WallPoint::WallPoint(cv::Point2d pos) {
+WallPoint::WallPoint(World *world, cv::Point2d pos) : CollidablePoint(world) {
     this->pos = pos;
 }

@@ -19,7 +19,7 @@ WallPoint *CollidableCircle::collision_detection_map(cv::Point2d *pos) {
             if ((x - pos->x) * (x - pos->x) + (y - pos->y) * (y - pos->y) <= this->radius * this->radius) {
                 cv::Point2d curPoint = cv::Point2d(x, y);
                 if (this->world->check_collision(curPoint)) {
-                    return new WallPoint(curPoint);
+                    return new WallPoint(this->world, curPoint);
                 }
             }
         }

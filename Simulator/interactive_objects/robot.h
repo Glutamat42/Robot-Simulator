@@ -46,23 +46,18 @@ public:
      *
      * TODO: It might be better to create a separate DummyRobot class for this purpose which allows "moving" robots and things like that
      */
-    Robot(std::string name, int radius, cv::Point2d start_pos, double start_orientation);
-
-    void setDrawOptions(cv::Scalar color, bool hideDirectionIndicator = false, int customRadius = 0);
-
-    std::string get_name() override;
-
-    double get_radius();
+    Robot(std::string name, int radius, World* world, cv::Point2d start_pos, double start_orientation);
 
     void handleCollision(CollidableObject *object) override;
 
-    double get_orientation();
+    void update();
+
+    void draw_robot(cv::Mat image);
+
 
     /** specify distance until robot should stop moving. It'll set_target_move_distance with the specified speed (set_speed)
      * If this function is not called the robot will set_target_move_distance until stopped by manually setting move_speed to 0
      * or setting a distance limit by this function
-     *
-     * TODO: implement
      *
      * @param pixel
      */
@@ -74,9 +69,15 @@ public:
         return move_target_distance;
     }
 
+    void setDrawOptions(cv::Scalar color, bool hideDirectionIndicator = false, int customRadius = 0);
+
+    std::string get_name() override;
+
+    double get_radius();
+
+    double get_orientation();
+
     /** same as set_target_move_distance(...) but for angle
-     *
-     * TODO: implement
      *
      * @param angle
      */
@@ -92,6 +93,12 @@ public:
 
     std::vector<SensorInterface *> get_sensors() override;
 
+    /** clear the list of sensors
+     *
+     * @param deletePointers if true also delete the objects in the sensors list
+     */
+    void clearSensorsList(bool deletePointers = false);
+
     void set_turn_speed(double angle) override;
 
     double get_turn_speed() override {
@@ -104,15 +111,11 @@ public:
         return this->move_speed;
     }
 
-    void update();
-
-    void draw_robot(cv::Mat image);
-
     double get_last_tick_movement_distance() override { return this->last_tick_movement_distance; }
 
     double get_last_tick_movement_angle() override { return this->last_tick_movement_angle; }
 
-    double get_max_turn_rate();
+    double get_max_turn_rate() override;
 };
 
 #endif //MR_CPP_CODE_ROBOT_H
