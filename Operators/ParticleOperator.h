@@ -40,8 +40,14 @@ private:
 
     int iterationsCounter = 0;
     bool useRandomParticles = true;
+
+    // The following values should be seen as constants for this operator. They might be changed in constructor for some special cases like benchmarking
+    bool BENCHMARK_MODE = false;
+    int INIT_N = 5000;
+    int TARGET_N = 75;
+    int TARGET_SHOULD_BE_REACHED_AFTER_ITERS = 200;
 public:
-    ParticleOperator(RobotControlInterface *robot, std::string map_filename);
+    ParticleOperator(RobotControlInterface *robot, std::string map_filename, bool benchmarkMode = false);
 
     void update() override;
 };

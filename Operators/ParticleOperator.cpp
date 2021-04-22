@@ -11,20 +11,24 @@
 
 using namespace std::chrono;
 
-int INIT_N = 5000;
-int TARGET_N = 75;
-int TARGET_SHOULD_BE_REACHED_AFTER_ITERS = 200;
 
-ParticleOperator::ParticleOperator(RobotControlInterface *robot, std::string map_filename) : RobotOperator(robot) {
+ParticleOperator::ParticleOperator(RobotControlInterface *robot, std::string map_filename, bool benchmarkMode) : RobotOperator(robot) {
+    this->BENCHMARK_MODE = benchmarkMode;
     this->particles_world = new World(map_filename, "Particle filter");
     this->secondOperator = new BasicWithNovelty(robot);
 
+    if (this->BENCHMARK_MODE) {
+        this->INIT_N = 5000;
+        this->TARGET_N = 200;
+        this->TARGET_SHOULD_BE_REACHED_AFTER_ITERS = 150;
+    }
+
     this->N = INIT_N;
 
+    // create initial particles distribution and show the simulation map
     this->particles = create_uniform_particles(this->particles_world->get_map_bounds().x,
                                                this->particles_world->get_map_bounds().y,
                                                this->N);
-
     this->updateParticleSimulation(this->particles, true);
 }
 
@@ -39,17 +43,6 @@ std::vector<std::array<double, 3>> ParticleOperator::create_uniform_particles(in
     std::uniform_real_distribution<double> x_distribution(0, x_range);
     std::uniform_real_distribution<double> y_distribution(0, y_range);
     std::uniform_real_distribution<double> angle_distribution(-M_PI, M_PI);
-
-    // TESTING
-    // exact match
-//    particles.push_back(std::array<double, 3>({320,
-//                                               40,
-//                                               1.18*M_PI}));
-    // good match
-//    particles.push_back(std::array<double, 3>({315,
-//                                               45,
-//                                               1.17*M_PI}));
-    // END TESTING
 
     for (int i = 0; i < N; i++) {
         particles.push_back(std::array<double, 3>({x_distribution(generator),
@@ -93,7 +86,15 @@ std::vector<std::array<double, 3>> ParticleOperator::particles_predict(std::vect
     return updated_particles;
 }
 
-
+/** do the simulation part
+ * - add robots (representing the particles) to the map
+ * - calculate sensor values (only map boundaries, ignoring obstacles/objects)
+ * - show map (if enabled)
+ *
+ * @param particles
+ * @param showMap
+ * @param weights
+ */
 void ParticleOperator::updateParticleSimulation(std::vector<std::array<double, 3>> particles, bool showMap, std::vector<double> weights) {
     // get sensor config to recreate (clone) the same sensors as on the robot
     std::vector<std::array<double, 2>> sensor_config;
@@ -101,6 +102,7 @@ void ParticleOperator::updateParticleSimulation(std::vector<std::array<double, 3
         sensor_config.push_back(std::array<double, 2>({sensor->get_sensor_angle(), sensor->get_sensor_max_distance()}));
     }
 
+    // If weights are provided they will be visualized on the map. For the color scaling we have to know what the maximum probability of one particle is
     double maxWeight = 0;
     double useCustomWeightColors = false;
     if (!weights.empty()) {
@@ -137,21 +139,21 @@ void ParticleOperator::updateParticleSimulation(std::vector<std::array<double, 3
         this->particles_world->add_object(dummyRobot);
     }
 
+    // show map if enabled
     if (showMap) {
         this->particles_world->show_map(true);
     }
 }
 
-
+/** update particle weights based on simulation
+ */
 std::vector<double> ParticleOperator::particles_update(std::vector<double> robotSensorValues, double lambda) {
-    std::vector<Robot *> simRobots = this->particles_world->get_robots();
+    std::vector<Robot *> simRobots = this->particles_world->get_robots();  // cache robots here, get_robots function is very expensive
     std::vector<double> updated_weights = std::vector<double>(simRobots.size(), 1.0);
     auto d = boost::math::exponential_distribution<>{lambda};
 
     double sumOfWeights = 0;
 
-    std::cout << std::fixed;
-    std::cout << std::setprecision(10);
 
     for (int i = 0; i < updated_weights.size(); ++i) {
         // collect sensor values of simulated particles
@@ -161,32 +163,19 @@ std::vector<double> ParticleOperator::particles_update(std::vector<double> robot
             simulationSensorValues.push_back(sensor->get_simplified_sensor_value());
         }
 
-//        std::cout << simRobots.at(i)->get_position().x << ";" << simRobots.at(i)->get_position().y << ";" << simRobots.at(i)->get_orientation() << ";";
-
         // calculate correlation
         for (int j = 0; j < simulationSensorValues.size(); ++j) {
             updated_weights[i] *= boost::math::pdf(d, abs(simulationSensorValues[j] - robotSensorValues[j]));
             updated_weights[i] += 1.e-300; // prevent rounding to 0
-
-//            if (i == 0) std::cout << robotSensorValues[j]<<";";
-//            else std::cout << simulationSensorValues[j] <<";";
         }
 
         sumOfWeights += updated_weights[i];
-
-//        std::cout << updated_weights[i] << ";" <<std::endl;
     }
 
-//    double maxWeight = 0;
-
-    // sum of weights should equal 1
+    // normalize weights: sum of weights should equal 1
     for (int i = 0; i < updated_weights.size(); ++i) {
         updated_weights[i] /= sumOfWeights;
-//        if (updated_weights[i] > maxWeight) {
-//            maxWeight = updated_weights[i];
-//        }
     }
-//    std::cout << "max weight: " << maxWeight << std::endl;
 
     return updated_weights;
 }
@@ -194,9 +183,9 @@ std::vector<double> ParticleOperator::particles_update(std::vector<double> robot
 std::tuple<std::vector<std::array<double, 3>>, std::vector<double>>
 ParticleOperator::particles_resample(std::vector<std::array<double, 3>> *oldParticles, std::vector<double> *weights, int N, double noise) {
     // resample algorithm is explained here: https://robotics.stackexchange.com/a/481
+    // creates an index list of entries to keep
     std::vector<double> positions = {};
     for (int i = 0; i < N; ++i) {
-//        positions.push_back(((double) rand() / RAND_MAX));
         positions.push_back((i + ((double) rand() / RAND_MAX)) / N);
     }
 
@@ -218,7 +207,8 @@ ParticleOperator::particles_resample(std::vector<std::array<double, 3>> *oldPart
         }
     }
 
-
+    // create a new particles list. It will be based on the previous one. Based on the index list created above some values will be kept, others
+    // will be deleted. There will be many duplicates, which is expected. Each value will be modified by a noise value.
     std::default_random_engine generator;
     std::uniform_real_distribution<double> uniformNoise(-noise, noise);
 
@@ -233,6 +223,8 @@ ParticleOperator::particles_resample(std::vector<std::array<double, 3>> *oldPart
         updatedWeights.push_back(weights->at(indexes[i]));
         weightSum += weights->at(indexes[i]);
     }
+
+    // normalize weights
     for (int i = 0; i < N; ++i) {
         weights->at(indexes[i]) /= weightSum;
     }
@@ -243,26 +235,29 @@ ParticleOperator::particles_resample(std::vector<std::array<double, 3>> *oldPart
                                                                                       this->particles_world->get_map_bounds().y, N / 100);
         std::uniform_int_distribution<int> uniformIndexCreator(0, N);
         for (int i = 0; i < N / 100; ++i) {
-//        continue;
             updatedParticles[uniformIndexCreator(generator)] = randomParticles[i];
         }
     }
 
-
     return std::tuple<std::vector<std::array<double, 3>>, std::vector<double>>(updatedParticles, updatedWeights);
 }
 
-
+/** loop function which will be called once every tick
+ *
+ */
 void ParticleOperator::update() {
-    // slowly decrease the amount of used particles
+    // slowly decrease the amount of used particles. This allows starting with a large number and still provide good performance in the long term.
+    // the most critical situation is the initial localization. Afterwards it seems to be pretty stable even with a really slow amount of particles
     if (iterationsCounter <= TARGET_SHOULD_BE_REACHED_AFTER_ITERS && iterationsCounter > 0) {
         int removeElementsCount = (INIT_N - TARGET_N) / TARGET_SHOULD_BE_REACHED_AFTER_ITERS;
         this->N -= removeElementsCount;
 
+        // bubble sort
+        // could be replaced with a more efficient algorithm if its computationally too expensive
         bool finished = false;
-        for (int i=0; !finished && i < this->particles.size(); ++i) {
+        for (int i = 0; !finished && i < this->particles.size(); ++i) {
             finished = true;
-            for (int j=0; j < this->particles.size(); ++j) {
+            for (int j = 0; j < this->particles.size(); ++j) {
                 if (this->weights[i] < this->weights[j]) {
                     finished = false;
                     double tmpWeight = this->weights[i];
@@ -275,20 +270,23 @@ void ParticleOperator::update() {
             }
         }
 
+        // drop the first particles (lowest probability)
         this->weights.erase(this->weights.begin(), this->weights.begin() + removeElementsCount);
         this->particles.erase(this->particles.begin(), this->particles.begin() + removeElementsCount);
 
+        // if this is the last step of decaying particles also disable the random particles. If the robot still not found his location
+        // then everything is already lost anyways
         if (iterationsCounter == TARGET_SHOULD_BE_REACHED_AFTER_ITERS) {
             this->useRandomParticles = false;
         }
     }
     this->iterationsCounter++;
-    // DEBUG PERF
-//    if (iterationsCounter == 50) exit(0);
-    // END DEBUG PERF
+
 
     this->secondOperator->update();
 
+    // Partial implementation of steps accumulation. It might be that the algorithm works better if there is more movement between steps.
+    // Especially on high TPS the movements are extremely small.
 //    // accumulate movement of some steps
 //    if (stepsCounter < GAME_TPS) { // once per second
 //        this->stepsCounter++;
@@ -299,11 +297,13 @@ void ParticleOperator::update() {
 //        double angleTurned = this->robot->get this->currentStepTurnedByAngle
 //    }
 
+    // Particle Filter Step 1) particle prediction: apply estimated movement distance / angle (currently in this simulator there is no noise for those values)
     std::vector<std::array<double, 3>> updated_particles = particles_predict(&this->particles,
                                                                              this->robot->get_last_tick_movement_distance(),
                                                                              this->robot->get_last_tick_movement_angle(),
                                                                              4);
 
+    // Particle Filter Step 2) update weights: update the weight of each particle based on how much the simulated sensor values correspond to the ones of our "real" robot
     // generate vector containing the current sensor values of the "real" robot
     std::vector<double> robotSensorValues = {};
     for (DistanceSensor *sensor : this->filter_for_distance_sensor(this->robot->get_sensors())) {
@@ -313,22 +313,31 @@ void ParticleOperator::update() {
     // this allows to read the sensor values of all simulated particles in particles_update()
     this->updateParticleSimulation(updated_particles, false);
 
+    // this will do the actual weights update
     std::vector<double> updated_weights = this->particles_update(robotSensorValues, 0.01);
 
+
+
+    // calculate estimated position
+    std::array<double, 3> estimatedParticle = weightedAverageParticle(updated_particles, updated_weights);
+
+    // show current particles with their weights and the estimated robot location
     // nice for visualization but will impact performance!
     this->updateParticleSimulation(updated_particles, false, updated_weights);
-
-    // calculate and show estimated position
-    std::array<double, 3> estimatedParticle = weightedAverageParticle(updated_particles, updated_weights);
-    Robot* estimatedRobot = new Robot("estimation", 8, cv::Point2d(estimatedParticle[0], estimatedParticle[1]), estimatedParticle[2]);
-    estimatedRobot->setDrawOptions(CV_RGB(255,255,255));
+    Robot *estimatedRobot = new Robot("estimation", 8, cv::Point2d(estimatedParticle[0], estimatedParticle[1]), estimatedParticle[2]);
+    estimatedRobot->setDrawOptions(CV_RGB(255, 255, 255));
     this->particles_world->add_object(estimatedRobot);
     this->particles_world->show_map(true);
 
+    // Particle Filter Step 3) resample: create new particles based on the weights. They will be mostly around the most previous particles with the highest weight.
     std::tuple<std::vector<std::array<double, 3>>, std::vector<double>> resampledTuple = this->particles_resample(&updated_particles,
                                                                                                                   &updated_weights,
                                                                                                                   this->N,
                                                                                                                   5);
+    // save particles and weights
     this->particles = std::get<0>(resampledTuple);
     this->weights = std::get<1>(resampledTuple);
+
+    // exit if benchmark mode and 200 iterations passed
+    if (this->BENCHMARK_MODE && iterationsCounter == 199) exit(0);
 }
