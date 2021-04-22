@@ -9,13 +9,17 @@
 using chrono_clock = std::chrono::system_clock;
 using chrono_ms = std::chrono::duration<double, std::milli>;
 
-void SimulationScenario::init() {
+void SimulationScenario::init(bool pause) {
     for (SensorInterface* sensor : sensors) {
         sensor->update_sensor_data(false);
     }
 
     world->show_map();
-    cv::waitKey();
+    if (pause) {
+        cv::waitKey();
+    } else {
+        cv::waitKey(1);
+    }
 }
 
 void SimulationScenario::startLoop() {
@@ -51,7 +55,8 @@ void SimulationScenario::startLoop() {
         world->show_map();
 
         // simple pause function
-        if ((char) cv::waitKey(1) == (char) 32) {
+        char keyPressed = cv::waitKey(1);
+        if (keyPressed == (char) 32) {
             bool key_was_released = false;
             std::cout << "Paused" << std::endl;
             while (true) {
@@ -61,6 +66,9 @@ void SimulationScenario::startLoop() {
                     break;
                 }
             }
+        } else if (keyPressed == (char) 27) {
+            std::cout << "Pressed ESC -> exit" << std::endl;
+            exit(0);
         }
 
         const chrono_ms loop_duration = chrono_clock::now() - loop_start_chrono;

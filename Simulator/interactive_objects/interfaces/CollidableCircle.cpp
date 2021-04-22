@@ -13,7 +13,7 @@
  * @return position of collision (wall point); empty/null if no collision
  */
 WallPoint *CollidableCircle::collision_detection_map(cv::Point2d *pos) {
-    // check collisions on map
+    // check collisions on grayscaleMap
     for (int x = floor(pos->x) - this->radius; x <= ceil(pos->x) + radius; ++x) {
         for (int y = floor(pos->y) - this->radius; y <= ceil(pos->y) + radius; ++y) {
             if ((x - pos->x) * (x - pos->x) + (y - pos->y) * (y - pos->y) <= this->radius * this->radius) {

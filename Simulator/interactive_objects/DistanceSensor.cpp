@@ -111,7 +111,7 @@ double DistanceSensor::get_simplified_sensor_value() {
     return sensor_data_value;
 }
 
-/** Maybe add an update cycle if something hits the sensor ray, but currently the sensor ray isn't known to the map
+/** Maybe add an update cycle if something hits the sensor ray, but currently the sensor ray isn't known to the grayscaleMap
  * and because of that wont be observed during collision checks
  */
 void DistanceSensor::handleCollision(CollidableObject *object) {}

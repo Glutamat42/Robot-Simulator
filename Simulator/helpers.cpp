@@ -80,3 +80,12 @@ bool pointBetween(cv::Point2d p1, cv::Point2d p2, cv::Point2d px) {
 
     return (mag_p1_px < mag_p1_p2 && mag_p2_px < mag_p1_p2);
 }
+
+std::vector<cv::Scalar> colorLookupTable = {CV_RGB(255, 0, 0), CV_RGB(255, 128, 0), CV_RGB(255, 255, 0), CV_RGB(128, 255, 0), CV_RGB(0, 255, 0)};
+
+cv::Scalar getColor(double power) {
+    if (power > 1) {
+        throw std::invalid_argument("power has to be between 0 and 1");
+    }
+    return colorLookupTable[(int)(power * colorLookupTable.size())];
+}

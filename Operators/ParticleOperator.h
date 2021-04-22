@@ -10,24 +10,38 @@
 
 class ParticleOperator : public RobotOperator {
 private:
-    World* particles_world;
+    World *particles_world;
 
 //    bool update_turning = false;
 //    bool update_moving = false;
 
-    RobotOperator* secondOperator;
+    RobotOperator *secondOperator;
 
-    void updateParticleSimulation(std::vector<std::array<double, 3>> particles, bool showMap);
+    int stepsCounter = 0;
+    double currentStepMoved = 0;
+    double currentStepTurnedByAngle = 0;
+
+    void updateParticleSimulation(std::vector<std::array<double, 3>> particles, bool showMap, std::vector<double> weights = {});
 
     std::vector<std::array<double, 3>> particles;
     std::vector<double> weights;
 
     std::vector<std::array<double, 3>> create_uniform_particles(int x_range, int y_range, int N);
-    std::vector<std::array<double, 3>> particles_predict(std::vector<std::array<double, 3>> *oldParticles, double move_distance, double move_angle, double standard_deviation = 1);
+
+    std::vector<std::array<double, 3>>
+    particles_predict(std::vector<std::array<double, 3>> *oldParticles, double move_distance, double move_angle, double standard_deviation = 1);
+
     std::vector<double> particles_update(std::vector<double> robotSensorValues, double lambda = 0.5);
-    std::tuple<std::vector<std::array<double, 3>>, std::vector<double>> particles_resample(std::vector<std::array<double, 3>> *oldParticles, std::vector<double> *weights);
+
+    std::tuple<std::vector<std::array<double, 3>>, std::vector<double>>
+    particles_resample(std::vector<std::array<double, 3>> *oldParticles, std::vector<double> *weights, int N, double noise = 10);
+
+    int N; //Number of particles
+
+    // DEBUG
+    int iterationsCounter = 0;
 public:
-    ParticleOperator (RobotControlInterface* robot, std::string map_filename);
+    ParticleOperator(RobotControlInterface *robot, std::string map_filename);
 
     void update() override;
 };

@@ -22,9 +22,7 @@ CollidableObject *CollidableRay::collision_detection_map(cv::Point2d *pos, doubl
     double dy = sin(this->angle);
 
     for (double i = 0; i < this->length; i += CALCULATION_RESOLUTION) {
-        double ray_x = pos->x + i * dx;
-        double ray_y = pos->y + i * dy;
-        cv::Point2d point = cv::Point2d(ray_x, ray_y);
+        cv::Point2d point = cv::Point2d(pos->x + i * dx, pos->y + i * dy);
 
         if (this->world->check_collision(point)) {
             *distance = i;

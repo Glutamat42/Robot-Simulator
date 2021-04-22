@@ -10,11 +10,19 @@
  * @param map_filename filename
  */
 World::World(std::string map_filename, std::string windowNameAppendix) {
-    this->map = cv::imread(map_filename);
-    if ((this->map.cols == 0) || (this->map.rows == 0)) {
+    this->grayscaleMap = cv::imread(map_filename, cv::IMREAD_GRAYSCALE);
+    if ((this->grayscaleMap.cols == 0) || (this->grayscaleMap.rows == 0)) {
         throw std::invalid_argument("Error! Could not read the image file: '" + map_filename + "'");
     }
     this->windowNameAppendix = windowNameAppendix;
+    this->mapBounds = cv::Point2d(this->grayscaleMap.cols, this->grayscaleMap.rows);
+
+    this->fastMap = std::vector<bool>(this->grayscaleMap.rows * this->grayscaleMap.cols);
+    for (int y = 0; y < this->mapBounds.y; y++) {
+        for (int x = 0; x < this->mapBounds.x; x++) {
+            this->setFastMapPixel(x, y, this->grayscaleMap.at<uchar>(y, x) != 0);
+        }
+    }
 }
 
 /** checks for collision of a point
@@ -23,31 +31,32 @@ World::World(std::string map_filename, std::string windowNameAppendix) {
  * @return true: collision, false: no collision
  */
 bool World::check_collision(cv::Point2d point) {
-    // check map bounds
-    if (point.x > this->get_map_bounds().x
-        || point.y > this->get_map_bounds().y
+    // check grayscaleMap bounds
+    if (point.x > this->mapBounds.x
+        || point.y > this->mapBounds.y
         || point.x < 0
         || point.y < 0) {
         return true;
     }
 
     // check walls
-    cv::Vec3b pixel_color = this->map.at<cv::Vec3b>(point);
-    return !((pixel_color.val[0] == 0) && (pixel_color.val[1] == 0) && (pixel_color.val[2] == 0));
+    return this->getFastMapPixel(point.x, point.y);
 }
 
 cv::Point2d World::get_map_bounds() {
-    return cv::Point2d(this->map.cols, this->map.rows);
+    return this->mapBounds;
 }
 
-void World::show_map() {
+void World::show_map(bool hideSensors) {
     cv::Mat image;
-    this->map.copyTo(image);
+    cv::cvtColor(this->grayscaleMap, image, cv::COLOR_GRAY2RGB);
 
-    for (Robot* robot : this->get_robots()) {
+    for (Robot *robot : this->get_robots()) {
         robot->draw_robot(image);
-        for (SensorInterface* sensor : robot->get_sensors()) {
-            sensor->draw_sensor_data(image);
+        if (!hideSensors) {
+            for (SensorInterface *sensor : robot->get_sensors()) {
+                sensor->draw_sensor_data(image);
+            }
         }
     }
 

@@ -30,7 +30,10 @@ private:
     double last_tick_movement_distance = 0;
     double last_tick_movement_angle = 0;
 
-
+    // visualization options
+    cv::Scalar robotCircleColor = CV_RGB(255, 0, 0);
+    bool hideDirectionIndicator = false;
+    int customDrawRadius = 0;
 public:
     Robot(std::string name, int radius, cv::Point2d start_pos, double start_orientation, World *world,
           double max_angle = M_PI / 6, double max_speed = 50.0);
@@ -44,6 +47,8 @@ public:
      * TODO: It might be better to create a separate DummyRobot class for this purpose which allows "moving" robots and things like that
      */
     Robot(std::string name, int radius, cv::Point2d start_pos, double start_orientation);
+
+    void setDrawOptions(cv::Scalar color, bool hideDirectionIndicator = false, int customRadius = 0);
 
     std::string get_name() override;
 

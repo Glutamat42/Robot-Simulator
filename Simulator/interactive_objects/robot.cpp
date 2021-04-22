@@ -143,7 +143,7 @@ void Robot::update() {
                 dy * step + this->pos.y
         );
 
-        // check map collision
+        // check grayscaleMap collision
         WallPoint* collidedWallPoint = this->collision_detection_map(&currentCheckPoint);
         if (collidedWallPoint) {
             this->handleCollision(collidedWallPoint);
@@ -184,13 +184,15 @@ void Robot::update() {
 }
 
 void Robot::draw_robot(cv::Mat image) {
-    circle(image, this->get_position(), (int) this->radius, CV_RGB(255, 0, 0), 1);
-    line(image,
-         this->get_position(),
-         this->get_position() + cv::Point2d(cos(this->get_orientation()) * this->radius,
-                                            sin(this->get_orientation()) * this->radius),
-         CV_RGB(0, 255, 0),
-         1);
+    circle(image, this->get_position(), customDrawRadius > 0 ? customDrawRadius : (int) this->radius, robotCircleColor, 1);
+    if (!hideDirectionIndicator) {
+        line(image,
+             this->get_position(),
+             this->get_position() + cv::Point2d(cos(this->get_orientation()) * this->radius,
+                                                sin(this->get_orientation()) * this->radius),
+             CV_RGB(0, 255, 0),
+             1);
+    }
 }
 
 std::string Robot::get_name() {
@@ -207,4 +209,10 @@ double Robot::get_radius() {
 
 double Robot::get_max_turn_rate() {
     return this->max_angle;
+}
+
+void Robot::setDrawOptions(cv::Scalar color, bool hideDirectionIndicator, int customRadius) {
+    this->robotCircleColor = color;
+    this->hideDirectionIndicator = hideDirectionIndicator;
+    this->customDrawRadius = customRadius;
 }

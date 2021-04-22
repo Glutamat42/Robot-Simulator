@@ -13,13 +13,15 @@
 
 class SimulationScenario {
 protected:
-    World* world;
-    std::vector<Robot*> robots;
-    std::vector<RobotOperator*> robotOperators;
-    std::vector<DistanceSensor*> sensors;
+    World *world;
+    std::vector<Robot *> robots;
+    std::vector<RobotOperator *> robotOperators;
+    std::vector<DistanceSensor *> sensors;
 public:
-    void init();
+    void init(bool pause = false);
+
     virtual void setUp() = 0;
+
     void startLoop();
 };
 

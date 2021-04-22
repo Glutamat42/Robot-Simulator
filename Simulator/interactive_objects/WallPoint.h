@@ -7,7 +7,7 @@
 
 #include "interfaces/CollidablePoint.h"
 
-/** At least currently this is more or less a dummy class to make map collisions compatible with the CollidableObjects system
+/** At least currently this is more or less a dummy class to make grayscaleMap collisions compatible with the CollidableObjects system
  *
  */
 class WallPoint : public CollidablePoint {
