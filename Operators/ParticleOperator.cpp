@@ -12,7 +12,7 @@
 using namespace std::chrono;
 
 int INIT_N = 5000;
-int TARGET_N = 100;
+int TARGET_N = 75;
 int TARGET_SHOULD_BE_REACHED_AFTER_ITERS = 200;
 
 ParticleOperator::ParticleOperator(RobotControlInterface *robot, std::string map_filename) : RobotOperator(robot) {
@@ -237,13 +237,15 @@ ParticleOperator::particles_resample(std::vector<std::array<double, 3>> *oldPart
         weights->at(indexes[i]) /= weightSum;
     }
 
-
     // replace random particles with random values to allow recovery in case the detection went horribly wrong
-    std::vector<std::array<double, 3>> randomParticles = create_uniform_particles(this->particles_world->get_map_bounds().x, this->particles_world->get_map_bounds().y, N/100);
-    std::uniform_int_distribution<int> uniformIndexCreator(0, N);
-    for (int i = 0; i < N/100 ; ++i) {
+    if (this->useRandomParticles) {
+        std::vector<std::array<double, 3>> randomParticles = create_uniform_particles(this->particles_world->get_map_bounds().x,
+                                                                                      this->particles_world->get_map_bounds().y, N / 100);
+        std::uniform_int_distribution<int> uniformIndexCreator(0, N);
+        for (int i = 0; i < N / 100; ++i) {
 //        continue;
-        updatedParticles[uniformIndexCreator(generator)] = randomParticles[i];
+            updatedParticles[uniformIndexCreator(generator)] = randomParticles[i];
+        }
     }
 
 
@@ -252,6 +254,7 @@ ParticleOperator::particles_resample(std::vector<std::array<double, 3>> *oldPart
 
 
 void ParticleOperator::update() {
+    // slowly decrease the amount of used particles
     if (iterationsCounter <= TARGET_SHOULD_BE_REACHED_AFTER_ITERS && iterationsCounter > 0) {
         int removeElementsCount = (INIT_N - TARGET_N) / TARGET_SHOULD_BE_REACHED_AFTER_ITERS;
         this->N -= removeElementsCount;
@@ -274,6 +277,10 @@ void ParticleOperator::update() {
 
         this->weights.erase(this->weights.begin(), this->weights.begin() + removeElementsCount);
         this->particles.erase(this->particles.begin(), this->particles.begin() + removeElementsCount);
+
+        if (iterationsCounter == TARGET_SHOULD_BE_REACHED_AFTER_ITERS) {
+            this->useRandomParticles = false;
+        }
     }
     this->iterationsCounter++;
     // DEBUG PERF
@@ -309,11 +316,19 @@ void ParticleOperator::update() {
     std::vector<double> updated_weights = this->particles_update(robotSensorValues, 0.01);
 
     // nice for visualization but will impact performance!
-    this->updateParticleSimulation(updated_particles, true, updated_weights);
+    this->updateParticleSimulation(updated_particles, false, updated_weights);
+
+    // calculate and show estimated position
+    std::array<double, 3> estimatedParticle = weightedAverageParticle(updated_particles, updated_weights);
+    Robot* estimatedRobot = new Robot("estimation", 8, cv::Point2d(estimatedParticle[0], estimatedParticle[1]), estimatedParticle[2]);
+    estimatedRobot->setDrawOptions(CV_RGB(255,255,255));
+    this->particles_world->add_object(estimatedRobot);
+    this->particles_world->show_map(true);
 
     std::tuple<std::vector<std::array<double, 3>>, std::vector<double>> resampledTuple = this->particles_resample(&updated_particles,
                                                                                                                   &updated_weights,
-                                                                                                                  this->N);
+                                                                                                                  this->N,
+                                                                                                                  5);
     this->particles = std::get<0>(resampledTuple);
     this->weights = std::get<1>(resampledTuple);
 }

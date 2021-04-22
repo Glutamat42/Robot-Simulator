@@ -38,8 +38,8 @@ private:
 
     int N; //Number of particles
 
-    // DEBUG
     int iterationsCounter = 0;
+    bool useRandomParticles = true;
 public:
     ParticleOperator(RobotControlInterface *robot, std::string map_filename);
 

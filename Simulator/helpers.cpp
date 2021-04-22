@@ -57,7 +57,7 @@ std::vector<cv::Point2d> collision_detection_ray_circle(CollidableRay *ray, Coll
         std::vector<cv::Point2d> ip_between_points;
 
         for (cv::Point2d point : ip) {
-            if (pointBetween(ray->get_position(),ray->getEndPoint(), point)) {
+            if (pointBetween(ray->get_position(), ray->getEndPoint(), point)) {
                 ip_between_points.push_back(point);
             }
         }
@@ -87,5 +87,32 @@ cv::Scalar getColor(double power) {
     if (power > 1) {
         throw std::invalid_argument("power has to be between 0 and 1");
     }
-    return colorLookupTable[(int)(power * colorLookupTable.size())];
+    return colorLookupTable[(int) (power * colorLookupTable.size())];
 }
+
+/** calculate weighted average particle
+ *
+ * @param particles particles vector of arrays of format [x, y, angle]
+ * @param weights normalized weights, same length as particles
+ * @return
+ */
+std::array<double, 3> weightedAverageParticle(std::vector<std::array<double, 3>> particles, std::vector<double> weights) {
+    int a = 1;
+    double b1 = 0;
+    double tx1 = 0;
+    double ty1 = 0;
+    double tangle1 = 0;
+    for (int i = 0; i < particles.size(); ++i) {
+        double weight = weights[i];
+        std::array<double, 3> particle = particles[i];
+        b1 += pow(1 - weight, a);
+        tx1 += pow(particle[0] * (1 - weight), a);
+        ty1 += pow(particle[1] * (1 - weight), a);
+        tangle1 += pow(particle[2] * (1 - weight), a);
+    }
+    double b = 1 / b1;
+    std::array<double, 3> result({b * tx1, b * ty1, b * tangle1});
+
+    return result;
+}
+

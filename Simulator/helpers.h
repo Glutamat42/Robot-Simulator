@@ -26,12 +26,12 @@ template <typename T> int sgn(T val) {
     return (T(0) < val) - (val < T(0));
 }
 
-
-
 /** get color from red (0) to green (1)
  *
  * @param power value between 0 and 1
  */
 cv::Scalar getColor(double power);
+
+std::array<double, 3> weightedAverageParticle(std::vector<std::array<double, 3>> particles, std::vector<double> weights);
 
 #endif //MR_CPP_CODE_HELPERS_H
