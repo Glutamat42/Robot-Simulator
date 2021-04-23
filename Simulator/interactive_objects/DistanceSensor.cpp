@@ -114,3 +114,12 @@ double DistanceSensor::get_simplified_sensor_value() {
  * and because of that wont be observed during collision checks
  */
 void DistanceSensor::handleCollision(CollidableObject *object) {}
+
+std::vector<DistanceSensor *> DistanceSensor::filter_for_distance_sensor(std::vector<SensorInterface *> sensors) {
+    std::vector<DistanceSensor *> distance_sensors;
+    for (SensorInterface *sensor: sensors) {
+        DistanceSensor *casted_sensor = dynamic_cast<DistanceSensor *>(sensor);
+        if (casted_sensor) distance_sensors.push_back(casted_sensor);
+    }
+    return distance_sensors;
+}

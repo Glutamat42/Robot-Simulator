@@ -14,8 +14,6 @@
 class RobotOperator {
 protected:
     RobotControlInterface* robot;
-
-    std::vector<DistanceSensor*> filter_for_distance_sensor(std::vector<SensorInterface*> sensors);
 public:
     explicit RobotOperator(RobotControlInterface* robot);
 

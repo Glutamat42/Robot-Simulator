@@ -99,7 +99,7 @@ std::vector<std::array<double, 3>> ParticleOperator::particles_predict(std::vect
 void ParticleOperator::updateParticleSimulation(std::vector<std::array<double, 3>> particles, bool showMap, std::vector<double> weights) {
     // get sensor config to recreate (clone) the same sensors as on the robot
     std::vector<std::array<double, 2>> sensor_config;
-    for (DistanceSensor *sensor : this->filter_for_distance_sensor(this->robot->get_sensors())) {
+    for (DistanceSensor *sensor : DistanceSensor::filter_for_distance_sensor(this->robot->get_sensors())) {
         sensor_config.push_back(std::array<double, 2>({sensor->get_sensor_angle(), sensor->get_sensor_max_distance()}));
     }
 
@@ -159,7 +159,7 @@ std::vector<double> ParticleOperator::particles_update(std::vector<double> robot
 
     for (int i = 0; i < updated_weights.size(); ++i) {
         // collect sensor values of simulated particles
-        std::vector<DistanceSensor *> sensors = this->filter_for_distance_sensor(simRobots.at(i)->get_sensors());
+        std::vector<DistanceSensor *> sensors = DistanceSensor::filter_for_distance_sensor(simRobots.at(i)->get_sensors());
         std::vector<double> simulationSensorValues = {};
         for (DistanceSensor *sensor : sensors) {
             simulationSensorValues.push_back(sensor->get_simplified_sensor_value());
@@ -309,7 +309,7 @@ void ParticleOperator::update() {
     // Particle Filter Step 2) update weights: update the weight of each particle based on how much the simulated sensor values correspond to the ones of our "real" robot
     // generate vector containing the current sensor values of the "real" robot
     std::vector<double> robotSensorValues = {};
-    for (DistanceSensor *sensor : this->filter_for_distance_sensor(this->robot->get_sensors())) {
+    for (DistanceSensor *sensor : DistanceSensor::filter_for_distance_sensor(this->robot->get_sensors())) {
         robotSensorValues.push_back(sensor->get_simplified_sensor_value());
     }
 

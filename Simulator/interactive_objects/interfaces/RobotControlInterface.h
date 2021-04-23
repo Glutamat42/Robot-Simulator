@@ -6,6 +6,8 @@
 #define MR_CPP_CODE_ROBOTCONTROLINTERFACE_H
 
 #include "../../interfaces/SensorInterface.h"
+#include <string>
+#include <vector>
 
 class RobotControlInterface {
 public:

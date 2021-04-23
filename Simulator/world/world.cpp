@@ -70,6 +70,10 @@ std::vector<CollidableObject *> World::get_objects() {
     return this->objects;
 }
 
+
+/* Returns a vector of only robots
+ * This function is very inefficient! Dont call it too often!
+ */
 std::vector<Robot *> World::get_robots() {
     std::vector<Robot *> robots;
     for (CollidableObject *object: this->objects) {

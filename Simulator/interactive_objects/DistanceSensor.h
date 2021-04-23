@@ -20,6 +20,8 @@ private:
 public:
     DistanceSensor(World *world, Robot *robot, double sensor_angle, double sensor_distance, bool disable_sensor_noise = false);
 
+    std::vector<DistanceSensor*> static filter_for_distance_sensor(std::vector<SensorInterface*> sensors);
+
     double get_sensor_angle();
 
     [[maybe_unused]] double get_sensor_max_distance();

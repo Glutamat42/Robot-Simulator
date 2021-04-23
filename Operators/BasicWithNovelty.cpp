@@ -32,7 +32,7 @@ void BasicWithNovelty::update() {
         return;
     }
 
-    std::vector<DistanceSensor *> distance_sensors = this->filter_for_distance_sensor(this->robot->get_sensors());
+    std::vector<DistanceSensor *> distance_sensors = DistanceSensor::filter_for_distance_sensor(this->robot->get_sensors());
 
 //    DistanceSensor *best_sensor = distance_sensors[0];
     DistanceSensor *worst_sensor = distance_sensors[0];
@@ -68,7 +68,7 @@ void BasicWithNovelty::update() {
 }
 
 bool BasicWithNovelty::novelty_detection() {
-    std::vector<DistanceSensor *> distance_sensors = this->filter_for_distance_sensor(this->robot->get_sensors());
+    std::vector<DistanceSensor *> distance_sensors = DistanceSensor::filter_for_distance_sensor(this->robot->get_sensors());
 
     // create vector containing sensor values
     std::vector<int> cur_sensor_values;

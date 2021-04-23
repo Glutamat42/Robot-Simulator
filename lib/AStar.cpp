@@ -4,6 +4,7 @@
 
 #include "AStar.h"
 #include "helpers.h"
+#include "../Simulator/constants.h"
 
 AStar::AStar(std::string map_filename, double paddingRadius) {
     // load map, generate fastmap and padded map, convert padded map to mat again and show it
@@ -16,7 +17,7 @@ AStar::AStar(std::string map_filename, double paddingRadius) {
 
     this->scaledAndPaddedMap = padObstacles(
             FastMap(grayscaleMap).getDownScaledMap(MAP_SCALING),
-            8.0 / MAP_SCALING);
+            paddingRadius / MAP_SCALING);
 
     if (SHOW_WHATS_GOING_ON) {
         cv::Mat paddedImage = this->scaledAndPaddedMap.toCVMat();

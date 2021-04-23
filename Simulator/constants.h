@@ -5,6 +5,10 @@
 #ifndef MR_CPP_CODE_CONSTANTS_H
 #define MR_CPP_CODE_CONSTANTS_H
 
+#include <string>
+
+const bool SHOW_WHATS_GOING_ON = true;
+
 const double CALCULATION_RESOLUTION = 1.0;
 const double GAME_TPS = 10;
 const double GAME_SPEED_MODIFIER = 1; // this will modify the time calculated for one game loop step. A value of 2 will cause an acceleration of game speed by 2. This means 2 seconds will be calculated in one second, but it will look to the game like 2 seconds passed.

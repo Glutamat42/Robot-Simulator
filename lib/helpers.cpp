@@ -3,7 +3,6 @@
 //
 
 #include "helpers.h"
-#include "../Simulator/interactive_objects/interfaces/CollidableCircle.h"
 
 std::optional<cv::Point2d> collision_detection_circle_circle(CollidableCircle *c1, CollidableCircle *c2, cv::Point2d *pos) {
     if (!pos) {
@@ -116,6 +115,7 @@ std::array<double, 3> weightedAverageParticle(std::vector<std::array<double, 3>>
     return result;
 }
 
+/** Add padding around obstacles. */
 FastMap padObstacles(FastMap map, double radius) {
     FastMap paddedMap = FastMap(map.getBounds().x, map.getBounds().y);
     FastMap kernel = FastMap((int)ceil(radius) * 2 + 1, (int)ceil(radius) * 2 + 1, false);
@@ -155,7 +155,6 @@ FastMap padObstacles(FastMap map, double radius) {
             }
         }
     }
-
     return paddedMap;
 }
 

@@ -9,7 +9,6 @@
 #include "FastMap.h"
 
 const int MAP_SCALING = 3;  // scaled map size = 1/MAP_SCALING
-const bool SHOW_WHATS_GOING_ON = true;
 
 struct AdjacencyTarget {
     cv::Point2i position;

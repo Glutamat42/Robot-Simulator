@@ -5,8 +5,8 @@
 #ifndef MR_CPP_CODE_SENSORINTERFACE_H
 #define MR_CPP_CODE_SENSORINTERFACE_H
 
-
 #include "../constants.h"
+#include <opencv2/core/types.hpp>
 
 class World;
 class Robot;

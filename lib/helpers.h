@@ -9,6 +9,8 @@
 #include "../Simulator/interactive_objects/interfaces/CollidableCircle.h"
 #include "../Simulator/interactive_objects/interfaces/CollidableRay.h"
 #include "FastMap.h"
+#include "../Simulator/interfaces/SensorInterface.h"
+#include "../Simulator/interactive_objects/DistanceSensor.h"
 
 
 /** check collision between two circles
