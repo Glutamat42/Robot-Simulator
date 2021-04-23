@@ -6,9 +6,9 @@
 #define MR_CPP_CODE_HELPERS_H
 
 #include <opencv2/imgproc.hpp>
-#include "interactive_objects/interfaces/CollidableCircle.h"
-#include "interactive_objects/interfaces/CollidableRay.h"
-#include "world/FastMap.h"
+#include "../Simulator/interactive_objects/interfaces/CollidableCircle.h"
+#include "../Simulator/interactive_objects/interfaces/CollidableRay.h"
+#include "FastMap.h"
 
 
 /** check collision between two circles

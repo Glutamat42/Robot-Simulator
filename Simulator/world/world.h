@@ -8,7 +8,7 @@
 
 #include "../interactive_objects/robot.h"
 #include "MapObject.h"
-#include "FastMap.h"
+#include "../../lib/FastMap.h"
 
 class World {
 private:

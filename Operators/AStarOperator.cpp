@@ -3,7 +3,7 @@
 //
 
 #include "AStarOperator.h"
-#include "../Simulator/helpers.h"
+#include "../lib/helpers.h"
 
 AStarOperator::AStarOperator(RobotControlInterface *robot, std::string map_filename) : RobotOperator(robot) {
     // load map, generate fastmap and padded map, convert padded map to mat again and show it
@@ -14,9 +14,8 @@ AStarOperator::AStarOperator(RobotControlInterface *robot, std::string map_filen
 
     FastMap map = FastMap(grayscaleMap);
 
-    int downScaling = 4;
-    FastMap _paddedMap = padObstacles(map, 8.0);
-    FastMap paddedMap = _paddedMap.getDownScaledMap(downScaling);
+    int downScaling = 6;
+    FastMap paddedMap = padObstacles(map.getDownScaledMap(downScaling), 8.0 / downScaling);
 
     cv::Mat paddedImage = paddedMap.toCVMat();
     cv::imshow("padded image", paddedImage);
@@ -25,7 +24,7 @@ AStarOperator::AStarOperator(RobotControlInterface *robot, std::string map_filen
 
     // Adjacency list
     struct adjacencyTarget {
-        cv::Point2i to; // TODO: rename eg to "position"
+        cv::Point2i position;
         double weight;
     };
     struct adjacencyRow {
@@ -177,7 +176,7 @@ AStarOperator::AStarOperator(RobotControlInterface *robot, std::string map_filen
         int indexOfCurrentRow = std::distance(adjacencyListSearchIndex.begin(), lower);
         if (indexOfCurrentRow == adjacencyListSearchIndex.size()) std::cout << "NOT FOUND" << std::endl;
         currentRow = adjacencyList[indexOfCurrentRow];
-//        for (adjacencyRow row : adjacencyList) {
+//        for (AdjacencyRow row : list) {
 //            if (row.from == currentNode.position) {
 //                currentRow = row;
 //                break;
@@ -192,7 +191,7 @@ AStarOperator::AStarOperator(RobotControlInterface *robot, std::string map_filen
             // check if neighbor is closed
             bool isInClosed = false;
             for (AStarElement node : closedList) {
-                if (node.position == curNeighborAdjacencyEntry.to) {
+                if (node.position == curNeighborAdjacencyEntry.position) {
                     isInClosed = true;
                     break;
                 }
@@ -205,7 +204,7 @@ AStarOperator::AStarOperator(RobotControlInterface *robot, std::string map_filen
             // search for currentNeighbor in openList
             int openListIndex = -1;
             for (int i = 0; i < openList.size(); ++i) {
-                if (openList[i].position == curNeighborAdjacencyEntry.to) {
+                if (openList[i].position == curNeighborAdjacencyEntry.position) {
                     openListIndex = i;
                     break;
                 }
@@ -219,9 +218,9 @@ AStarOperator::AStarOperator(RobotControlInterface *robot, std::string map_filen
             // if not yet in openlist: add entry and calculate heuristic (h_cost)
             if (openListIndex == -1) {
                 openListIndex = openList.size();
-                cv::Point2i heuristic_distance = curNeighborAdjacencyEntry.to - targetLocation;
+                cv::Point2i heuristic_distance = curNeighborAdjacencyEntry.position - targetLocation;
                 double heuristic = sqrt(heuristic_distance.x * heuristic_distance.x + heuristic_distance.y * heuristic_distance.y);
-                openList.push_back((AStarElement) {curNeighborAdjacencyEntry.to, currentNode.position, heuristic, 0, 0});
+                openList.push_back((AStarElement) {curNeighborAdjacencyEntry.position, currentNode.position, heuristic, 0, 0});
             }
 
             // calculate and set distance (g_cost) and f_cost
@@ -243,7 +242,7 @@ AStarOperator::AStarOperator(RobotControlInterface *robot, std::string map_filen
     }
     cv::imshow("A*", image);
 #pragma clang diagnostic pop
-    exit(0);
+//    exit(0);
     cv::waitKey(0);
     std::cout << "HELLO WORLD" << std::endl;
 }

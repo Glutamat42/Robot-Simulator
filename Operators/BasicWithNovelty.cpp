@@ -3,7 +3,7 @@
 //
 
 #include "BasicWithNovelty.h"
-#include "../Simulator/helpers.h"
+#include "../lib/helpers.h"
 
 
 BasicWithNovelty::BasicWithNovelty(RobotControlInterface *robot) : RobotOperator(robot) {

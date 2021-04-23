@@ -5,12 +5,18 @@
 #ifndef MR_CPP_CODE_FASTMAP_H
 #define MR_CPP_CODE_FASTMAP_H
 
+#include <vector>
+#include <opencv2/core/types.hpp>
+#include <opencv2/opencv.hpp>
+
 /** a simple structure for a 2d map object with only boolean values */
 class FastMap {
 private:
     std::vector<bool> fastMap;
     cv::Point2i mapBounds;
 public:
+    FastMap() : FastMap(100, 100) {}
+
     FastMap(int x, int y, bool initialValue = false) {
         this->mapBounds = cv::Point2i(x, y);
         this->fastMap = std::vector<bool>(this->mapBounds.x * this->mapBounds.y, initialValue);
@@ -30,10 +36,14 @@ public:
     }
 
     void setPixel(int x, int y, bool value) {
+        int index = mapBounds.y * y + x;
+        if (index >= mapBounds.y * mapBounds.x) throw std::invalid_argument("index is out of map");
         fastMap[mapBounds.y * y + x] = value;
     }
 
     bool getPixel(int x, int y) {
+        int index = mapBounds.y * y + x;
+        if (index >= mapBounds.y * mapBounds.x) throw std::invalid_argument("index is out of map");
         return fastMap[mapBounds.y * y + x];
     }
 
@@ -54,8 +64,8 @@ public:
     FastMap getDownScaledMap(int factor) {
         FastMap scaledMap(mapBounds.x / factor, mapBounds.y / factor);
 
-        for(int x = 0; x < mapBounds.x; x+=factor) {
-            for(int y = 0; y < mapBounds.y; y+=factor) {
+        for(int x = 0; x < scaledMap.getBounds().x * factor; x+=factor) {
+            for(int y = 0; y < scaledMap.getBounds().y * factor; y+=factor) {
                 bool setTrue = false;
                 for(int factorX = 0; !setTrue && factorX < factor; ++factorX) {
                     for(int factorY = 0; !setTrue && factorY < factor; ++factorY) {

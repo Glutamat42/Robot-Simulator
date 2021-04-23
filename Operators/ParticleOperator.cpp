@@ -5,7 +5,7 @@
 #include <random>
 #include "ParticleOperator.h"
 #include "BasicWithNovelty.h"
-#include "../Simulator/helpers.h"
+#include "../lib/helpers.h"
 #include <boost/math/distributions/exponential.hpp>
 #include <chrono>
 
@@ -259,6 +259,7 @@ void ParticleOperator::update() {
         bool finished = false;
         for (int i = 0; !finished && i < this->particles.size(); ++i) {
             finished = true;
+            // TODO: probably replacing "int j = 0" with "int j = i + 1" will improve performance and wont break anything
             for (int j = 0; j < this->particles.size(); ++j) {
                 if (this->weights[i] < this->weights[j]) {
                     finished = false;

@@ -4,7 +4,7 @@
 
 #include "robot.h"
 #include "../world/world.h"
-#include "../helpers.h"
+#include "../../lib/helpers.h"
 #include "CollisionData.h"
 
 Robot::Robot(std::string name,

@@ -6,7 +6,7 @@
 #include "../../constants.h"
 #include "../WallPoint.h"
 #include "../../world/world.h"
-#include "../../helpers.h"
+#include "../../../lib/helpers.h"
 #include "../CollisionData.h"
 
 CollidableObject *CollidableRay::collision_detection_map(cv::Point2d *pos) {
