@@ -8,7 +8,7 @@
 
 #include "FastMap.h"
 
-const int MAP_SCALING = 4;  // scaled map size = 1/MAP_SCALING
+const int MAP_SCALING = 3;  // scaled map size = 1/MAP_SCALING
 const bool SHOW_WHATS_GOING_ON = true;
 
 struct AdjacencyTarget {
@@ -45,16 +45,24 @@ private:
     // AStar
     cv::Point2i startPos;
     cv::Point2i targetPos;
+    double heuristicBias;
     std::vector<AStarElement> openList;
     std::vector<AStarElement> closedList;
 
 public:
+    /**
+     *
+     * @param map_filename
+     * @param paddingRadius should at least cover the size of the robot. Maybe add some additional padding
+     */
     AStar(std::string map_filename, double paddingRadius);
 
     /** as long as the map doesnt change the same instance can be used many times. Just set the new
      * parameters here and then start the loop
+     *
+     * @param bias Allows to over (or under) weight the heuristic. Increasing it will lead to faster results, but they won't be optimal anymore
      */
-    void setAStarParameters(cv::Point2i startPos, cv::Point2i targetPos);
+    void setAStarParameters(cv::Point2i startPosition, cv::Point2i targetPosition, double bias = 1.0);
 
     /** This will run the A* loop
      *
@@ -65,7 +73,7 @@ public:
     /** rescale the points to the original map resolution, resort array (first element -> startPos) and get only the points
      *
      */
-     std::vector<cv::Point2i> static astarListToPointList(std::vector<AStarElement> path);
+     std::vector<cv::Point2i> static aStarListToPointList(std::vector<AStarElement> path);
 };
 
 

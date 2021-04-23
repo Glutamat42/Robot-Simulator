@@ -23,6 +23,8 @@ AStar::AStar(std::string map_filename, double paddingRadius) {
         cv::imshow("padded image", paddedImage);
         cv::waitKey(1);
     }
+
+    this->adjacencyList = this->generateAdjacencyList(this->scaledAndPaddedMap);
 }
 
 const int neighborsDiagonal[4][2] = {{-1, -1},
@@ -92,19 +94,24 @@ const int neighbors[8][2] = {{-1, -1},
                              {1,  0},
                              {0,  1}};
 
-void AStar::setAStarParameters(cv::Point2i startPos, cv::Point2i targetPos) {
-    this->startPos = cv::Point2i(startPos.x / MAP_SCALING, startPos.y / MAP_SCALING);
-    this->targetPos = cv::Point2i(targetPos.x / MAP_SCALING, targetPos.y / MAP_SCALING);
+void AStar::setAStarParameters(cv::Point2i startPosition, cv::Point2i targetPosition, double bias) {
+    this->startPos = cv::Point2i(startPosition.x / MAP_SCALING, startPosition.y / MAP_SCALING);
+    this->targetPos = cv::Point2i(targetPosition.x / MAP_SCALING, targetPosition.y / MAP_SCALING);
+    this->heuristicBias = bias;
+
+    if (bias != 1.0) std::cout << "Using heuristic bias of " << this->heuristicBias << std::endl;
 
     this->openList.clear();
     this->closedList.clear();
 
     // add startPos to openList
-    this->openList.push_back((AStarElement) {startPos, cv::Point2i(), 0, 0, 0, true});
+    this->openList.push_back((AStarElement) {this->startPos, cv::Point2i(), 0, 0, 0, true});
 }
 
-std::vector<AStarElement> AStar::runAStar() {
+std::vector <AStarElement> AStar::runAStar() {
     cv::Mat image;
+    int weightColorDivider = this->scaledAndPaddedMap.getBounds().x * 0.6;  // simply looks not bad on my example
+
     int loopCounter = 0;
     AStarElement targetNodeAStarElement;
 
@@ -117,7 +124,7 @@ std::vector<AStarElement> AStar::runAStar() {
             // show current open and closed list on map
             // inefficient, but "good enough"
             for (const auto &entry : closedList) {
-                image.at<cv::Vec3b>(entry.position) = cv::Vec3b(0, 0, 255);
+                image.at<cv::Vec3b>(entry.position) = cv::Vec3b(0, 0, 255 * (int) entry.f_cost / weightColorDivider);
             }
             for (const auto &entry : openList) {
                 image.at<cv::Vec3b>(entry.position) = cv::Vec3b(0, 255, 0);
@@ -150,12 +157,12 @@ std::vector<AStarElement> AStar::runAStar() {
 
         // find adjacency entry for currentNode node
         AdjacencyRow currentRow;
-        auto lower = std::lower_bound(adjacencyList.searchIndex.begin(),
-                                      adjacencyList.searchIndex.end(),
-                                      currentNode.position.x * adjacencyList.searchIndexXMultiplier + currentNode.position.y);
-        long indexOfCurrentRow = std::distance(adjacencyList.searchIndex.begin(), lower);
-        if (indexOfCurrentRow == adjacencyList.searchIndex.size()) continue; // no entry for current element in adjacency list
-        currentRow = adjacencyList.list[indexOfCurrentRow];
+        auto lower = std::lower_bound(this->adjacencyList.searchIndex.begin(),
+                                      this->adjacencyList.searchIndex.end(),
+                                      currentNode.position.x * this->adjacencyList.searchIndexXMultiplier + currentNode.position.y);
+        long indexOfCurrentRow = std::distance(this->adjacencyList.searchIndex.begin(), lower);
+        if (indexOfCurrentRow == this->adjacencyList.searchIndex.size()) continue; // no entry for current element in adjacency list
+        currentRow = this->adjacencyList.list[indexOfCurrentRow];
 
         // iterate through neighbors
         for (AdjacencyTarget &curNeighborAdjacencyEntry : currentRow.to) {
@@ -173,7 +180,7 @@ std::vector<AStarElement> AStar::runAStar() {
             double newDistance = currentNode.distance + curNeighborAdjacencyEntry.weight;
 
             // search for currentNeighbor in openList
-            int openListIndex = -1;
+            long openListIndex = -1;
             for (int i = 0; i < openList.size(); ++i) {
                 if (openList[i].position == curNeighborAdjacencyEntry.position) {
                     openListIndex = i;
@@ -188,15 +195,15 @@ std::vector<AStarElement> AStar::runAStar() {
 
             // if not yet in openlist: add entry and calculate heuristic (h_cost)
             if (openListIndex == -1) {
-                openListIndex = openList.size();
+                openListIndex = (long) openList.size();
                 cv::Point2i heuristic_distance = curNeighborAdjacencyEntry.position - this->targetPos;
-                double heuristic = heuristic_distance.x * heuristic_distance.x + heuristic_distance.y * heuristic_distance.y; // for eucliean distance: sqrt(), but the heuristic is also valid without (which will save some computation time)
+                double heuristic = sqrt(heuristic_distance.x * heuristic_distance.x + heuristic_distance.y * heuristic_distance.y);
                 openList.push_back((AStarElement) {curNeighborAdjacencyEntry.position, currentNode.position, heuristic, 0, 0});
             }
 
             // calculate and set distance (g_cost) and f_cost
             openList[openListIndex].distance = newDistance;
-            openList[openListIndex].f_cost = openList[openListIndex].distance + openList[openListIndex].heuristic;
+            openList[openListIndex].f_cost = openList[openListIndex].distance + openList[openListIndex].heuristic * this->heuristicBias;
             openList[openListIndex].prev = currentNode.position;
         }
     }
@@ -214,18 +221,21 @@ std::vector<AStarElement> AStar::runAStar() {
             }
         }
     }
-    if (SHOW_WHATS_GOING_ON) image.at<cv::Vec3b>(path.back().position) = cv::Vec3b(127, 127, 127);
+    if (SHOW_WHATS_GOING_ON) {
+        image.at<cv::Vec3b>(path.back().position) = cv::Vec3b(127, 127, 127);
+        cv::imshow("A*", image);
+    }
 
     return path;
 }
 
-std::vector<cv::Point2i> AStar::astarListToPointList(std::vector<AStarElement> path) {
-    std::vector<cv::Point2i> pointsList;
-    for(int i = path.size()-1; i >= 0; --i) {
+std::vector <cv::Point2i> AStar::aStarListToPointList(std::vector <AStarElement> path) {
+    std::vector <cv::Point2i> pointsList;
+    for (int i = path.size() - 1; i >= 0; --i) {
         pointsList.push_back(cv::Point2i(
                 path[i].position.x * MAP_SCALING,
                 path[i].position.y * MAP_SCALING
-                ));
+        ));
     }
     return pointsList;
 }
