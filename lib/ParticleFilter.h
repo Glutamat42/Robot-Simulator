@@ -81,13 +81,13 @@ public:
 
     /** calling this function will do one update step of the prediction
      *
-     * @param distance moved distance, if not provided it will use the last ticks movement of the robot
-     * @param angle turned angle, if not provided it will use the last ticks tunging of the robot
+     * @param distance moved since last call of this function
+     * @param angle turned since last call of this function
      * @return
      */
     ParticleEvaluationData update(double distance, double angle);
 
-    /** wrapper for update(double distance = -1, double angle), will get distance and angle from the robots last movement */
+    /** wrapper for update(double distance, double angle), will get distance and angle from the robots last movement */
     ParticleEvaluationData update();
 };
 
