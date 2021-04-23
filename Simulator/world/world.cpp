@@ -17,12 +17,7 @@ World::World(std::string map_filename, std::string windowNameAppendix) {
     this->windowNameAppendix = windowNameAppendix;
     this->mapBounds = cv::Point2d(this->grayscaleMap.cols, this->grayscaleMap.rows);
 
-    this->fastMap = std::vector<bool>(this->grayscaleMap.rows * this->grayscaleMap.cols);
-    for (int y = 0; y < this->mapBounds.y; y++) {
-        for (int x = 0; x < this->mapBounds.x; x++) {
-            this->setFastMapPixel(x, y, this->grayscaleMap.at<uchar>(y, x) != 0);
-        }
-    }
+    this->fastMap = FastMap(this->grayscaleMap);
 }
 
 /** checks for collision of a point
@@ -40,7 +35,7 @@ bool World::check_collision(cv::Point2d point) {
     }
 
     // check walls
-    return this->getFastMapPixel(point.x, point.y);
+    return this->fastMap.getPixel(point.x, point.y);
 }
 
 cv::Point2d World::get_map_bounds() {

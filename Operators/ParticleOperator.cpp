@@ -332,7 +332,7 @@ void ParticleOperator::update() {
         if (distanceFromLastEstimation >= maxAcceptableMovementDistance) {
             this->estimationHistory.clear();
             this->mapLine->clearPoints();
-            std::cout << "location probably not yet found";
+            std::cout << "location probably not yet found" << std::endl;
         }
     }
     this->estimationHistory.push_back(estimatedParticle);

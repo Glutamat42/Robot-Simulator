@@ -116,3 +116,47 @@ std::array<double, 3> weightedAverageParticle(std::vector<std::array<double, 3>>
     return result;
 }
 
+FastMap padObstacles(FastMap map, double radius) {
+    FastMap paddedMap = FastMap(map.getBounds().x, map.getBounds().y);
+    FastMap kernel = FastMap((int)ceil(radius) * 2 + 1, (int)ceil(radius) * 2 + 1, false);
+    cv::Point2i center((int)ceil(radius) + 1, (int)ceil(radius) + 1);
+
+    // create circle kernel
+    for (int x = center.x - radius; x <= center.x + radius; ++x) {
+        for (int y = center.y - radius; y <= center.y + radius; ++y) {
+            if ((x - center.x) * (x - center.x) + (y - center.y) * (y - center.y) <= radius * radius) {
+                kernel.setPixel(x, y, true);
+            }
+        }
+    }
+
+    // apply kernel
+    // iterate through all pixels
+    for (int mapX = 0; mapX < map.getBounds().x; ++mapX) {
+        for (int mapY = 0; mapY < map.getBounds().y; ++mapY) {
+            // if current pixel is true the kernel has to be applied to the padded map
+            if (map.getPixel(mapX, mapY)) {
+                // iterate through all pixels of the kernel
+                for (int kernelX = 0; kernelX < kernel.getBounds().x; ++kernelX) {
+                    for (int kernelY = 0; kernelY < kernel.getBounds().y; ++kernelY) {
+                        // if current kernel position is not true we dont have to do anything
+                        if (kernel.getPixel(kernelX, kernelY)) {
+                            int paddedX = mapX + kernelX - center.x - 1; // " - center.x - 1" because the kernel center has to be mapped to the current pixel (offset)
+                            int paddedY = mapY + kernelY - center.y - 1;
+
+                            // check boundaries
+                            if (paddedX < 0 || paddedY < 0 || paddedX >= map.getBounds().x || paddedY >= map.getBounds().y) continue;
+
+                            // all checks passed: set pixel on new map
+                            paddedMap.setPixel(paddedX, paddedY, true);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return paddedMap;
+}
+
+

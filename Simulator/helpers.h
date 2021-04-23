@@ -8,6 +8,7 @@
 #include <opencv2/imgproc.hpp>
 #include "interactive_objects/interfaces/CollidableCircle.h"
 #include "interactive_objects/interfaces/CollidableRay.h"
+#include "world/FastMap.h"
 
 
 /** check collision between two circles
@@ -33,5 +34,7 @@ template <typename T> int sgn(T val) {
 cv::Scalar getColor(double power);
 
 std::array<double, 3> weightedAverageParticle(std::vector<std::array<double, 3>> particles, std::vector<double> weights);
+
+FastMap padObstacles(FastMap map, double radius);
 
 #endif //MR_CPP_CODE_HELPERS_H

@@ -7,6 +7,7 @@
 #include "Scenario/RobotArmy.h"
 #include "Scenario/ParticleScenario.h"
 #include "Scenario/TestRobots.h"
+#include "Scenario/AStarScenario.h"
 #include <opencv2/opencv.hpp>
 #include <opencv2/core/core.hpp>
 #include <unistd.h>
@@ -20,7 +21,8 @@ int main() {
 
 //    SimulationScenario* scenario = new TestRobots();
 //    SimulationScenario* scenario = new RobotArmy();
-    SimulationScenario* scenario = new ParticleScenario();
+//    SimulationScenario* scenario = new ParticleScenario();
+    SimulationScenario* scenario = new AStarScenario();
     scenario->setUp();
     scenario->startLoop();
 

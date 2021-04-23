@@ -8,6 +8,7 @@
 
 #include "../interactive_objects/robot.h"
 #include "MapObject.h"
+#include "FastMap.h"
 
 class World {
 private:
@@ -17,15 +18,7 @@ private:
     std::string windowNameAppendix;
     cv::Point2i mapBounds;  // store in separate variable to increase performance when accessing grayscaleMap bounds
 
-    std::vector<bool> fastMap;
-
-    void setFastMapPixel(int x, int y, bool value) {
-        fastMap[mapBounds.y * y + x] = value;
-    }
-
-    bool getFastMapPixel(int x, int y) {
-        return fastMap[mapBounds.y * y + x];
-    }
+    FastMap fastMap = FastMap(0, 0);
 
 public:
     explicit World(std::string map_filename, std::string windowNameAppendix = "");
