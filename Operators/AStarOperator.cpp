@@ -11,7 +11,7 @@ AStarOperator::AStarOperator(RobotControlInterface *robot, std::string map_filen
     cv::Point2i targetLocation(750, 700);
     AStar aStar = AStar(map_filename, this->robot->get_radius() + 3);;
     aStar.setAStarParameters(startLocation, targetLocation, 1.4);
-    std::vector<cv::Point2i> path = AStar::aStarListToPointList(aStar.runAStar());
+    std::vector<cv::Point2d> path = AStar::aStarListToPointList(aStar.runAStar());
 
 //    exit(0);
     cv::waitKey(0);

@@ -102,8 +102,8 @@ void Robot::set_turn_speed(double angle) {
 
 
 void Robot::set_speed(double speed) {
-    if (speed > this->max_speed) {
-        this->move_speed = this->max_speed;
+    if (abs(speed) > this->max_speed) {
+        this->move_speed = sgn(speed) * this->max_speed;
     } else {
         this->move_speed = speed;
     }

@@ -8,7 +8,7 @@
 
 #include "FastMap.h"
 
-const int MAP_SCALING = 3;  // scaled map size = 1/MAP_SCALING
+const int MAP_SCALING = 6;  // scaled map size = 1/MAP_SCALING
 
 struct AdjacencyTarget {
     cv::Point2i position;
@@ -72,7 +72,7 @@ public:
     /** rescale the points to the original map resolution, resort array (first element -> startPos) and get only the points
      *
      */
-     std::vector<cv::Point2i> static aStarListToPointList(std::vector<AStarElement> path);
+     std::vector<cv::Point2d> static aStarListToPointList(std::vector<AStarElement> path);
 };
 
 

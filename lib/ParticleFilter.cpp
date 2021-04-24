@@ -235,7 +235,14 @@ std::tuple<std::vector<std::array<double, 3>>, std::vector<double>> ParticleFilt
 ParticleEvaluationData ParticleFilter::update(double distance, double angle) {
     // slowly decrease the amount of used particles. This allows starting with a large number and still provide good performance in the long term.
     // the most critical situation is the initial localization. Afterwards it seems to be pretty stable even with a really slow amount of particles
-    if (this->iterationsCounter <= TARGET_SHOULD_BE_REACHED_AFTER_ITERS && this->iterationsCounter > 0) {
+    if (!this->initialLocationFinished && this->iterationsCounter <= TARGET_SHOULD_BE_REACHED_AFTER_ITERS && this->iterationsCounter > 0) {
+        // check uncertainty metric if location seems to be already successful
+        if (locationCertaintyEstimation > CERTAINTY_ESTIMATION_THRESHOLD) {
+            this->initialLocationFinished = true;
+            this->N = TARGET_N;
+            this->useRandomParticles = false;
+        }
+
         int removeElementsCount = (INIT_N - TARGET_N) / TARGET_SHOULD_BE_REACHED_AFTER_ITERS;
         this->N -= removeElementsCount;
 
@@ -245,7 +252,7 @@ ParticleEvaluationData ParticleFilter::update(double distance, double angle) {
         for (int i = 0; !finished && i < this->particles.size(); ++i) {
             finished = true;
             // TODO: probably replacing "int j = 0" with "int j = i + 1" will improve performance and wont break anything
-            for (int j = 0; j < this->particles.size(); ++j) {
+            for (int j = i+1; j < this->particles.size(); ++j) {
                 if (this->weights[i] < this->weights[j]) {
                     finished = false;
                     double tmpWeight = this->weights[i];
@@ -267,6 +274,8 @@ ParticleEvaluationData ParticleFilter::update(double distance, double angle) {
         if (this->iterationsCounter == TARGET_SHOULD_BE_REACHED_AFTER_ITERS) {
             this->useRandomParticles = false;
         }
+    } else if (this->iterationsCounter == TARGET_SHOULD_BE_REACHED_AFTER_ITERS + 1 && locationCertaintyEstimation < CERTAINTY_ESTIMATION_THRESHOLD) {
+        std::cout << "Localization probably failed";
     }
     this->iterationsCounter++;
 
@@ -296,17 +305,17 @@ ParticleEvaluationData ParticleFilter::update(double distance, double angle) {
 
     // estimate whether the prediction is probably already accurate and if yes, add to history, if not: clear history
     // also visualize it on the map as a line
-    bool locationEstimated = false;
     if (!this->estimationHistory.empty()) {
         // TODO: replace this algorithm with a better one looking further in the past and calculate an uncertainty value
         double maxAcceptableMovementDistance = pow(this->robot->get_max_move_speed() / GAME_TPS * 2.5, 2); // theoretically maximum possible movement distance * X as square to prevent requirement of sqrt
         double distanceFromLastEstimation = pow(this->estimationHistory.back()[0] - estimatedParticle[0], 2) + pow(this->estimationHistory.back()[1] - estimatedParticle[1], 2);
         if (distanceFromLastEstimation >= maxAcceptableMovementDistance) {
             this->estimationHistory.clear();
+            this->locationCertaintyEstimation = this->locationCertaintyEstimation > 0 ? this->locationCertaintyEstimation - 1 / GAME_TPS : 0;
             if (SHOW_WHATS_GOING_ON) this->mapLine->clearPoints();
             std::cout << "location probably not yet found" << std::endl;
         } else {
-            locationEstimated = true;
+            this->locationCertaintyEstimation = this->locationCertaintyEstimation < 10 ? this->locationCertaintyEstimation + 1 / GAME_TPS : 10;
         }
     }
     if (SHOW_WHATS_GOING_ON) this->estimationHistory.push_back(estimatedParticle);
@@ -337,7 +346,7 @@ ParticleEvaluationData ParticleFilter::update(double distance, double angle) {
     // exit if benchmark mode and 200 iterations passed
     if (this->BENCHMARK_MODE && this->iterationsCounter == 199) exit(0);
 
-    return ParticleEvaluationData({cv::Point2d(estimatedParticle[0], estimatedParticle[1]), estimatedParticle[2], locationEstimated});
+    return ParticleEvaluationData({cv::Point2d(estimatedParticle[0], estimatedParticle[1]), estimatedParticle[2], locationCertaintyEstimation >= CERTAINTY_ESTIMATION_THRESHOLD});
 }
 
 

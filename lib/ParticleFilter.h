@@ -10,6 +10,8 @@
 #include "../Simulator/interactive_objects/interfaces/RobotControlInterface.h"
 #include "../Simulator/world/MapLine.h"
 
+const int CERTAINTY_ESTIMATION_THRESHOLD = 2;
+
 struct ParticleEvaluationData {
     cv::Point2d currentLocation;
     double angle;
@@ -30,11 +32,13 @@ private:
 
     int iterationsCounter = 0;
     bool useRandomParticles = true;
+    double locationCertaintyEstimation = 0;
+    bool initialLocationFinished = false;
 
     // The following values should be seen as constants for this operator. They might be changed in constructor for some special cases like benchmarking
     bool BENCHMARK_MODE = false;
-    int INIT_N = 5000;  // The following variables are required for the decaying particles functionality
-    int TARGET_N = 75;
+    int INIT_N = 7500;  // The following variables are required for the decaying particles functionality
+    int TARGET_N = 250;
     int TARGET_SHOULD_BE_REACHED_AFTER_ITERS = 200;
 
     // -- functions --

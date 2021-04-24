@@ -15,9 +15,10 @@ AStar::AStar(std::string map_filename, double paddingRadius) {
 
 //    this->map = FastMap(grayscaleMap);
 
-    this->scaledAndPaddedMap = padObstacles(
-            FastMap(grayscaleMap).getDownScaledMap(MAP_SCALING),
-            paddingRadius / MAP_SCALING);
+    FastMap paddedMap = padObstacles(FastMap(grayscaleMap), paddingRadius);
+    this->scaledAndPaddedMap = paddedMap.getDownScaledMap(MAP_SCALING);
+    // This approach is a little faster but the result works not so good
+//    this->scaledAndPaddedMap = padObstacles(FastMap(grayscaleMap).getDownScaledMap(MAP_SCALING),paddingRadius / MAP_SCALING);
 
     if (SHOW_WHATS_GOING_ON) {
         cv::Mat paddedImage = this->scaledAndPaddedMap.toCVMat();
@@ -230,8 +231,8 @@ std::vector <AStarElement> AStar::runAStar() {
     return path;
 }
 
-std::vector <cv::Point2i> AStar::aStarListToPointList(std::vector <AStarElement> path) {
-    std::vector <cv::Point2i> pointsList;
+std::vector <cv::Point2d> AStar::aStarListToPointList(std::vector <AStarElement> path) {
+    std::vector <cv::Point2d> pointsList;
     for (int i = path.size() - 1; i >= 0; --i) {
         pointsList.push_back(cv::Point2i(
                 path[i].position.x * MAP_SCALING,
