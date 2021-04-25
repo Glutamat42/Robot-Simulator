@@ -5,9 +5,11 @@
 #ifndef MR_CPP_CODE_FASTASTAR_H
 #define MR_CPP_CODE_FASTASTAR_H
 
+#include <utility>
+
 #include "FastMap.h"
 
-const int MAP_SCALING = 2;  // scaled map size = 1/MAP_SCALING
+const int MAP_SCALING = 3;  // scaled map size = 1/MAP_SCALING
 
 struct AdjacencyTarget {
     long index;
@@ -15,14 +17,14 @@ struct AdjacencyTarget {
 };
 
 struct AStarElement {
-    long prevIndex;
-    double heuristic;
-    double distance;
-    double f_cost;
+    long prevIndex=0;
+    double heuristic=0;
+    double distance=0;
+    double f_cost=0;
     bool startNode = false;
     bool isOpenList = false;
     bool isClosedList = false;
-    cv::Point2i position;  // only used after A* pathfinding completed
+    cv::Point2i position = cv::Point2i(0,0);  // only used after A* pathfinding completed
 };
 struct AStarDatapoint {
     std::vector<AdjacencyTarget> adjacencyTargets;
@@ -56,16 +58,14 @@ public:
     void setPixelAstarElement(int x, int y, AStarElement element) {
         int index = this->bounds.y * y + x;
         if (index >= this->bounds.y * this->bounds.x) throw std::invalid_argument("index is out of map");
-        aStarList[this->bounds.y * y + x].aStarElement = element;
+        aStarList[this->bounds.y * y + x].aStarElement = std::move(element);
     }
 
     void resetAStarData() {
-        std::cout << this->aStarList.size() << std::endl;
         for (int i = 0; i < this->aStarList.size(); ++i) {
             AStarDatapoint* datapoint = &this->aStarList[i];
             datapoint->aStarElement = AStarElement();
         }
-        std::cout << this->aStarList.size() << std::endl;
     }
 
     AStarDatapoint* getPixel(int x, int y) {
@@ -112,8 +112,9 @@ public:
      * parameters here and then start the loop
      *
      * @param bias Allows to over (or under) weight the heuristic. Increasing it will lead to faster results, but they won't be optimal anymore
+     * @return true if everything went fine, false if start or target position are invalid (in wall)
      */
-    void setAStarParameters(cv::Point2i startPosition, cv::Point2i targetPosition, double bias = 1.0);
+    bool setAStarParameters(cv::Point2i startPosition, cv::Point2i targetPosition, double bias = 1.0);
 
     /** This will run the A* loop
      *

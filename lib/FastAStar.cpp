@@ -68,9 +68,17 @@ const int neighbors[8][2] = {{-1, -1},
                              {1,  0},
                              {0,  1}};
 
-void FastAStar::setAStarParameters(cv::Point2i startPosition, cv::Point2i targetPosition, double bias) {
-    this->startPos = cv::Point2i(startPosition.x / MAP_SCALING, startPosition.y / MAP_SCALING);
-    this->targetPos = cv::Point2i(targetPosition.x / MAP_SCALING, targetPosition.y / MAP_SCALING);
+bool FastAStar::setAStarParameters(cv::Point2i startPosition, cv::Point2i targetPosition, double bias) {
+    cv::Point2i _startPos = startPosition / MAP_SCALING;
+    cv::Point2i _targetPos = targetPosition / MAP_SCALING;
+
+    if (this->scaledAndPaddedMap.getPixel(_startPos.x, _startPos.y) || this->scaledAndPaddedMap.getPixel(_targetPos.x, _targetPos.y)) {
+        std::cout << "invalid start or target position" << std::endl;
+        return false;
+    }
+
+    this->startPos = _startPos;
+    this->targetPos = _targetPos;
     this->targetIndex = this->aStarMap.XYToIndex(this->targetPos.x, this->targetPos.y);
     this->heuristicBias = bias;
 
@@ -83,8 +91,10 @@ void FastAStar::setAStarParameters(cv::Point2i startPosition, cv::Point2i target
     this->aStarMap.setPixelAstarElement(
             this->startPos.x,
             this->startPos.y,
-            AStarElement({this->aStarMap.XYToIndex(this->startPos.x, this->startPos.y), 0, 0, 0, true}));
+            AStarElement({this->aStarMap.XYToIndex(this->startPos.x, this->startPos.y), 0, 0, 0, true, false, false, cv::Point2i()}));
     this->aStarListOpen.push_back(this->aStarMap.XYToIndex(this->startPos.x, this->startPos.y));
+
+    return true;
 }
 
 std::vector <AStarElement> FastAStar::runAStar() {
@@ -101,7 +111,6 @@ std::vector <AStarElement> FastAStar::runAStar() {
     while (true) {
         if (SHOW_WHATS_GOING_ON && loopCounter % 5000 == 0) {
             // show current open and closed list on map
-            // inefficient, but "good enough"
             for (int x = 0; x <this->scaledMapBounds.x; ++x) {
                 for (int y = 0; y <this->scaledMapBounds.y; ++y) {
                     AStarDatapoint* aStarDatapoint = this->aStarMap.getPixel(x,y);
@@ -181,18 +190,19 @@ std::vector <AStarElement> FastAStar::runAStar() {
     std::cout << "A* took " << loopCounter << " iterations" << std::endl;
 
     // now the required distances are known, but the shortest path is still not (directly) known
+    targetNodeAStarElement.position = this->targetPos;
     std::vector<AStarElement> path = {targetNodeAStarElement};
-    path.push_back(targetNodeAStarElement);
+
     while(!path.back().startNode) {
-        path.back().position = cv::Point2i(this->aStarMap.IndexToXY(path.back().prevIndex));
         if (SHOW_WHATS_GOING_ON) image.at<cv::Vec3b>(path.back().position) = cv::Vec3b(127, 127, 127);
-        path.push_back(this->aStarMap.getPixel(path.back().prevIndex)->aStarElement);
+        cv::Point2i position = this->aStarMap.IndexToXY(path.back().prevIndex);
+        AStarElement aStarElement = this->aStarMap.getPixel(path.back().prevIndex)->aStarElement;
+        aStarElement.position = position;
+        path.push_back(aStarElement);
     }
-    path.back().position = cv::Point2i(this->aStarMap.IndexToXY(path.back().prevIndex));
     if (SHOW_WHATS_GOING_ON) {
-        if (SHOW_WHATS_GOING_ON) image.at<cv::Vec3b>(path.back().position) = cv::Vec3b(127, 127, 127);
+        image.at<cv::Vec3b>(path.back().position) = cv::Vec3b(127, 127, 127);
         cv::imshow("A*", image);
-//        cv::waitKey(0);
     }
 
     return path;

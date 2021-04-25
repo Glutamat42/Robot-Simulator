@@ -8,14 +8,14 @@
 
 #include "../lib/ParticleFilter.h"
 #include "RobotOperator.h"
-#include "../lib/AStar.h"
+#include "../lib/FastAStar.h"
 #include <boost/circular_buffer.hpp>
 
 class SelfDrivingOperator : public RobotOperator {
 private:
     RobotOperator *secondOperator;
     ParticleFilter particleFilter;
-    AStar aStar;
+    FastAStar aStar;
     std::vector<cv::Point2d> path;
     long waypointId;
     boost::circular_buffer<cv::Point2d> positionHistory;

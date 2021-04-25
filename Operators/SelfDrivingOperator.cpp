@@ -8,7 +8,7 @@
 
 const double EXTRA_PADDING = 8;
 const int WAYPOINT_DISTANCE = 10;
-const double ACCEPTABLE_DISTANCE_MULTIPLIER = 2;
+const double ACCEPTABLE_DISTANCE_MULTIPLIER = 3;
 const double UNSTUCK_HISTORY_DURATION_IN_SECONDS = 5;
 const double UNSTUCK_STUCK_IF_MOVED_LESS_THAN = 8;
 
@@ -49,7 +49,7 @@ void SelfDrivingOperator::update() {
         cv::Point2d relativeDistance = this->path[this->waypointId] - particleFilterEstimation.currentLocation;
         long squaredDistanceToWaypoint = relativeDistance.x * relativeDistance.x + relativeDistance.y * relativeDistance.y;
 
-        if (squaredDistanceToWaypoint > WAYPOINT_DISTANCE * WAYPOINT_DISTANCE * ACCEPTABLE_DISTANCE_MULTIPLIER) {
+        if (squaredDistanceToWaypoint > ((WAYPOINT_DISTANCE + this->robot->get_radius()) * (WAYPOINT_DISTANCE + this->robot->get_radius()) * ACCEPTABLE_DISTANCE_MULTIPLIER)) {
             std::cout << "Too far away from next waypoint -> drop current route and recalculate it" << std::endl;
             this->path.clear();
             this->waypointId = 0;
@@ -68,9 +68,10 @@ void SelfDrivingOperator::update() {
 
     // use A* to find a path
     if (this->path.empty()) {
-        this->aStar.setAStarParameters(particleFilterEstimation.currentLocation, targetPosition);
-        this->path = AStar::aStarListToPointList(this->aStar.runAStar());
-        this->waypointId = 0;
+        if(this->aStar.setAStarParameters(particleFilterEstimation.currentLocation, targetPosition)) {
+            this->path = FastAStar::aStarListToPointList(this->aStar.runAStar());
+            this->waypointId = 0;
+        }
     }
 
 
@@ -95,9 +96,10 @@ bool SelfDrivingOperator::navigate(cv::Point2d currentLocation, double currentAn
         } else {
             // on waypoint, but not last one -> move to next one
             this->waypointId = this->getNextWaypointIndex(this->waypointId);
-            moveToWaypoint(currentLocation, currentAngle);
         }
     }
+
+    moveToWaypoint(currentLocation, currentAngle);
     return false;
 }
 
@@ -115,6 +117,4 @@ void SelfDrivingOperator::moveToWaypoint(cv::Point2d currentLocation, double cur
     double speedMultiplier = abs(angleToWaypoint) < 1 ? 1 - abs(angleToWaypoint) : 0;
     this->robot->set_speed(this->robot->get_max_move_speed() * speedMultiplier);
     this->robot->set_target_move_distance(distanceToWaypoint);
-
-
 }

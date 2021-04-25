@@ -232,6 +232,7 @@ std::tuple<std::vector<std::array<double, 3>>, std::vector<double>> ParticleFilt
     }
 
     // replace random particles with random values to allow recovery in case the detection went horribly wrong
+    // TODO: use particles with lowest weight to replace
     if (enableRandomParticles && mapBounds != cv::Point2d()) {
         std::vector<std::array<double, 3>> randomParticles = create_uniform_particles(mapBounds.x,
                                                                                       mapBounds.y,

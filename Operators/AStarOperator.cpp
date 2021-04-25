@@ -5,7 +5,6 @@
 #include <chrono>
 #include "AStarOperator.h"
 #include "../lib/helpers.h"
-//#include "../lib/AStar.h"
 #include "../lib/FastAStar.h"
 
 using chrono_clock = std::chrono::system_clock;
@@ -18,18 +17,17 @@ AStarOperator::AStarOperator(RobotControlInterface *robot, std::string map_filen
 //    AStar aStar = AStar(map_filename, this->robot->get_radius() + 3);;
     FastAStar aStar = FastAStar(map_filename, this->robot->get_radius() + 3);;
 
-
 //    std::vector<cv::Point2d> path = AStar::aStarListToPointList(aStar.runAStar());
     const auto loop_start_chrono = chrono_clock::now();
-    aStar.setAStarParameters(startLocation, targetLocation, 1.4);
-    aStar.runAStar();
-//    aStar.setAStarParameters(cv::Point2i(300, 300), targetLocation, 1.4);
+//    aStar.setAStarParameters(startLocation, targetLocation, 1.0);
 //    aStar.runAStar();
+    aStar.setAStarParameters(cv::Point2i(40, 40), targetLocation, 1.0);
+    aStar.runAStar();
     const chrono_ms loop_duration = chrono_clock::now() - loop_start_chrono;
     std::cout << loop_duration.count() << "ms";
 
 
-    exit(0);
+//    exit(0);
     cv::waitKey(0);
     std::cout << "HELLO WORLD" << std::endl;
 }
