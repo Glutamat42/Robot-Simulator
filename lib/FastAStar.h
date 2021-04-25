@@ -9,7 +9,7 @@
 
 #include "FastMap.h"
 
-const int MAP_SCALING = 3;  // scaled map size = 1/MAP_SCALING
+const int MAP_SCALING = 1;  // scaled map size = 1/MAP_SCALING
 
 struct AdjacencyTarget {
     long index;
@@ -91,6 +91,8 @@ private:
 
     AStarMap aStarMap;
     std::vector<long> aStarListOpen;
+    // <f_cost, index>
+    std::map<std::tuple<double, double, long>, long> aStarMapOpen;
 
     // adjacency list
     void generateAdjacencyList();

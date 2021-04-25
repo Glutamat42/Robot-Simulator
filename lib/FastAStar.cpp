@@ -85,14 +85,16 @@ bool FastAStar::setAStarParameters(cv::Point2i startPosition, cv::Point2i target
     if (bias != 1.0) std::cout << "Using heuristic bias of " << this->heuristicBias << std::endl;
 
     this->aStarMap.resetAStarData();
-    this->aStarListOpen.clear();
+//    this->aStarListOpen.clear();
+    this->aStarMapOpen.clear();
 
     // add startPos to openList
     this->aStarMap.setPixelAstarElement(
             this->startPos.x,
             this->startPos.y,
-            AStarElement({this->aStarMap.XYToIndex(this->startPos.x, this->startPos.y), 0, 0, 0, true, false, false, cv::Point2i()}));
-    this->aStarListOpen.push_back(this->aStarMap.XYToIndex(this->startPos.x, this->startPos.y));
+            AStarElement({this->aStarMap.XYToIndex(this->startPos.x, this->startPos.y), 0, 0, 0, true, true, false, cv::Point2i()}));
+//    this->aStarListOpen.push_back(this->aStarMap.XYToIndex(this->startPos.x, this->startPos.y));
+    this->aStarMapOpen.insert(std::pair<std::tuple<double, double, long>, long>(std::tuple(0,0,0), this->aStarMap.XYToIndex(this->startPos.x, this->startPos.y)));
 
     return true;
 }
@@ -128,18 +130,23 @@ std::vector <AStarElement> FastAStar::runAStar() {
         loopCounter++;
 
 
-        // find element with lowest f_cost, remove it from openList and add to closedList
-        long lowestFcostIndex = this->aStarListOpen[0];
-        int lowestFcostIndexListIndex = 0;
+//        // find element with lowest f_cost, remove it from openList and add to closedList
+//        long lowestFcostIndex = this->aStarListOpen[0];
+//        int lowestFcostIndexListIndex = 0;
+//        AStarDatapoint* currentNode = this->aStarMap.getPixel(lowestFcostIndex);
+//        for (int i = 0; i < this->aStarListOpen.size(); ++i) {
+//            if (this->aStarMap.getPixel(this->aStarListOpen[i])->aStarElement.f_cost < currentNode->aStarElement.f_cost) {
+//                currentNode = this->aStarMap.getPixel(this->aStarListOpen[i]);
+//                lowestFcostIndex = this->aStarListOpen[i];
+//                lowestFcostIndexListIndex = i;
+//            } // TODO: if openList[i].f_cost == currentNode.f_cost -> lower heuristic?
+//        }
+//        this->aStarListOpen.erase(this->aStarListOpen.begin() + lowestFcostIndexListIndex);
+
+        long lowestFcostIndex = this->aStarMapOpen.begin()->second;
+        this->aStarMapOpen.erase(this->aStarMapOpen.begin());
         AStarDatapoint* currentNode = this->aStarMap.getPixel(lowestFcostIndex);
-        for (int i = 0; i < this->aStarListOpen.size(); ++i) {
-            if (this->aStarMap.getPixel(this->aStarListOpen[i])->aStarElement.f_cost < currentNode->aStarElement.f_cost) {
-                currentNode = this->aStarMap.getPixel(this->aStarListOpen[i]);
-                lowestFcostIndex = this->aStarListOpen[i];
-                lowestFcostIndexListIndex = i;
-            } // TODO: if openList[i].f_cost == currentNode.f_cost -> lower heuristic?
-        }
-        this->aStarListOpen.erase(this->aStarListOpen.begin() + lowestFcostIndexListIndex);
+
         currentNode->aStarElement.isOpenList = false;
         currentNode->aStarElement.isClosedList = true;
 
@@ -171,19 +178,42 @@ std::vector <AStarElement> FastAStar::runAStar() {
 
             // if not yet in openlist: add entry and calculate heuristic (h_cost)
             if (!isInOpenList) {
-                currentNeighborDatapoint->aStarElement.isOpenList = true;
-                this->aStarListOpen.push_back(curNeighborAdjacencyEntry.index);
+//                this->aStarListOpen.push_back(curNeighborAdjacencyEntry.index);
 
                 cv::Point2i heuristic_distance = this->aStarMap.IndexToXY(curNeighborAdjacencyEntry.index) - this->targetPos;
                 double heuristic = sqrt(heuristic_distance.x * heuristic_distance.x + heuristic_distance.y * heuristic_distance.y);
                 currentNeighborDatapoint->aStarElement.heuristic = heuristic;
-                currentNeighborDatapoint->aStarElement.prevIndex = lowestFcostIndex;
+//                currentNeighborDatapoint->aStarElement.prevIndex = lowestFcostIndex;
             }
 
+            double old_f_cost = currentNeighborDatapoint->aStarElement.f_cost;
             // calculate and set distance (g_cost) and f_cost
             currentNeighborDatapoint->aStarElement.distance = newDistance;
             currentNeighborDatapoint->aStarElement.f_cost = currentNeighborDatapoint->aStarElement.distance + currentNeighborDatapoint->aStarElement.heuristic * this->heuristicBias;
             currentNeighborDatapoint->aStarElement.prevIndex = lowestFcostIndex;
+
+            if (!isInOpenList) {
+                currentNeighborDatapoint->aStarElement.isOpenList = true;
+                while(!this->aStarMapOpen.insert(std::pair<std::tuple<double,double, long>, long>(std::tuple<double,double, long> (currentNeighborDatapoint->aStarElement.f_cost, currentNeighborDatapoint->aStarElement.heuristic, curNeighborAdjacencyEntry.index), curNeighborAdjacencyEntry.index)).second) {
+                    currentNeighborDatapoint->aStarElement.heuristic = std::nextafter(currentNeighborDatapoint->aStarElement.heuristic, std::numeric_limits<double>::max());
+                }
+
+            } else {
+
+//                if (curNeighborAdjacencyEntry.index == 62189) {
+//                    for (auto it = this->aStarMapOpen.begin(); it != this->aStarMapOpen.end(); ++it)
+//                        if (it->second == 62189) {
+//                            auto test2 = it->second;
+//                            auto test1 = it->first;
+//                            auto test = it;
+//                            std::cout << test1;
+//                        }
+//                }
+
+                auto nodeHandler = this->aStarMapOpen.extract(std::tuple<double, double, long>(old_f_cost, currentNeighborDatapoint->aStarElement.heuristic, curNeighborAdjacencyEntry.index));
+                nodeHandler.key() = std::tuple<double, double, long>(currentNeighborDatapoint->aStarElement.f_cost, currentNeighborDatapoint->aStarElement.heuristic, curNeighborAdjacencyEntry.index);
+                this->aStarMapOpen.insert(std::move(nodeHandler));
+            }
         }
     }
 

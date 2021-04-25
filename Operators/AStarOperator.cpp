@@ -19,10 +19,10 @@ AStarOperator::AStarOperator(RobotControlInterface *robot, std::string map_filen
 
 //    std::vector<cv::Point2d> path = AStar::aStarListToPointList(aStar.runAStar());
     const auto loop_start_chrono = chrono_clock::now();
-//    aStar.setAStarParameters(startLocation, targetLocation, 1.0);
-//    aStar.runAStar();
-    aStar.setAStarParameters(cv::Point2i(40, 40), targetLocation, 1.0);
+    aStar.setAStarParameters(startLocation, targetLocation, 1.0);
     aStar.runAStar();
+//    aStar.setAStarParameters(cv::Point2i(40, 40), targetLocation, 1.0);
+//    aStar.runAStar();
     const chrono_ms loop_duration = chrono_clock::now() - loop_start_chrono;
     std::cout << loop_duration.count() << "ms";
 
