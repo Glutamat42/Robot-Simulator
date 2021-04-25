@@ -8,7 +8,7 @@
 
 #include "../lib/ParticleFilter.h"
 #include "RobotOperator.h"
-#include "../lib/FastAStar.h"
+#include "../lib/AStar/FastAStar.h"
 #include <boost/circular_buffer.hpp>
 
 class SelfDrivingOperator : public RobotOperator {

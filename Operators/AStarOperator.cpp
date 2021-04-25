@@ -5,7 +5,7 @@
 #include <chrono>
 #include "AStarOperator.h"
 #include "../lib/helpers.h"
-#include "../lib/FastAStar.h"
+#include "../lib/AStar/FastAStar.h"
 
 using chrono_clock = std::chrono::system_clock;
 using chrono_ms = std::chrono::duration<double, std::milli>;

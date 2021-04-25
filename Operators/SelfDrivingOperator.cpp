@@ -69,16 +69,14 @@ void SelfDrivingOperator::update() {
     // use A* to find a path
     if (this->path.empty()) {
         if(this->aStar.setAStarParameters(particleFilterEstimation.currentLocation, targetPosition)) {
-            this->path = FastAStar::aStarListToPointList(this->aStar.runAStar());
+            this->path = this->aStar.aStarListToPointList(this->aStar.runAStar());
             this->waypointId = 0;
         }
     }
-
-
 }
 
 long SelfDrivingOperator::getNextWaypointIndex(long currentWaypointIndex) {
-    long newIndex = currentWaypointIndex + 1 * WAYPOINT_DISTANCE / MAP_SCALING;
+    long newIndex = currentWaypointIndex + 1 * WAYPOINT_DISTANCE / this->aStar.getMapScaling();
     if (newIndex >= this->path.size()) newIndex = (long) this->path.size() - 1;
     return newIndex;
 }
