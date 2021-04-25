@@ -7,6 +7,10 @@
 #include "../../lib/helpers.h"
 #include "CollisionData.h"
 
+Robot::Robot(World *world) : CollidableCircle(world) {
+
+}
+
 Robot::Robot(std::string name,
              int radius,
              cv::Point2d start_pos,
@@ -63,13 +67,6 @@ Robot::Robot(std::string name, int radius, World *world, double max_angle, doubl
     this->pos = start_pos;
 }
 
-Robot::Robot(std::string name, int radius, World* world, cv::Point2d start_pos, double start_orientation) : CollidableCircle(world) {
-    this->name = name;
-    this->radius = radius;
-    this->pos = start_pos;
-    this->orientation = start_orientation;
-}
-
 double Robot::get_orientation() {
     return this->orientation;
 }
@@ -92,6 +89,7 @@ void Robot::clearSensorsList(bool deletePointers) {
     this->sensors.clear();
 }
 
+
 void Robot::set_turn_speed(double angle) {
     if (abs(angle) > this->max_angle) {
         this->move_angle = copysign(1.0, angle) * this->max_angle;
@@ -99,7 +97,6 @@ void Robot::set_turn_speed(double angle) {
         this->move_angle = angle;
     }
 }
-
 
 void Robot::set_speed(double speed) {
     if (abs(speed) > this->max_speed) {

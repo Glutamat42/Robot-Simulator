@@ -7,7 +7,7 @@
 #include "CollisionData.h"
 
 DistanceSensor::DistanceSensor(World *world, Robot *robot, double sensor_angle, double sensor_distance, bool disable_sensor_noise)
-        : SensorInterface(world, robot),
+        : SensorInterface(world, robot, SensorType::distance),
           CollidableRay(world, robot->get_orientation() + sensor_angle, sensor_distance) {
     this->robot = robot;
     this->sensor_angle = sensor_angle;
@@ -118,8 +118,7 @@ void DistanceSensor::handleCollision(CollidableObject *object) {}
 std::vector<DistanceSensor *> DistanceSensor::filter_for_distance_sensor(std::vector<SensorInterface *> sensors) {
     std::vector<DistanceSensor *> distance_sensors;
     for (SensorInterface *sensor: sensors) {
-        DistanceSensor *casted_sensor = dynamic_cast<DistanceSensor *>(sensor);
-        if (casted_sensor) distance_sensors.push_back(casted_sensor);
+        if (sensor->getSensorType() == SensorType::distance) distance_sensors.push_back((DistanceSensor*) sensor);
     }
     return distance_sensors;
 }

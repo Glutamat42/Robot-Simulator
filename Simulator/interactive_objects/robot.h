@@ -16,7 +16,7 @@
 
 
 class Robot : public CollidableCircle, public RobotControlInterface {
-private:
+protected:
     std::string name;
     double orientation;
     double max_angle; // max angle per second
@@ -34,19 +34,14 @@ private:
     cv::Scalar robotCircleColor = CV_RGB(255, 0, 0);
     bool hideDirectionIndicator = false;
     int customDrawRadius = 0;
+
+    explicit Robot(World *world);
 public:
+
     Robot(std::string name, int radius, cv::Point2d start_pos, double start_orientation, World *world,
           double max_angle = M_PI / 6, double max_speed = 50.0);
 
     Robot(std::string name, int radius, World *world, double max_angle = M_PI / 6, double max_speed = 50.0);
-
-    /** This constructor allows creation of dummy robots (eg for particle filter visualization)
-     * Robots created using this constructor wont be able to use their update method and no collision
-     * detection will run, allowing to place robots inside walls.
-     *
-     * TODO: It might be better to create a separate DummyRobot class for this purpose which allows "moving" robots and things like that
-     */
-    Robot(std::string name, int radius, World* world, cv::Point2d start_pos, double start_orientation);
 
     void handleCollision(CollidableObject *object) override;
 

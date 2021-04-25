@@ -11,16 +11,22 @@
 class World;
 class Robot;
 
+enum class SensorType {
+    distance
+};
+
 class SensorInterface {
 protected:
     World* world;
     Robot* robot;
     double standardDeviation;
+    SensorType sensorType;
 
 public:
-    inline SensorInterface(World* world, Robot* robot, double standardDeviation = 1) {
+    inline SensorInterface(World* world, Robot* robot, SensorType sensorType, double standardDeviation = 1) {
         this->world = world;
         this->robot = robot;
+        this->sensorType = sensorType;
         this->standardDeviation = standardDeviation * NOISE_MODIFIER;
     };
 
@@ -29,6 +35,8 @@ public:
     virtual void update_sensor_data(bool disable_object_collision_detection) = 0;
 
     virtual void draw_sensor_data(cv::Mat image) = 0;
+
+    SensorType getSensorType() { return this->sensorType; }
 };
 
 #endif //MR_CPP_CODE_SENSORINTERFACE_H

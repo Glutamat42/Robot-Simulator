@@ -9,6 +9,8 @@
 #include <string>
 #include "../Simulator/interactive_objects/interfaces/RobotControlInterface.h"
 #include "../Simulator/world/MapLine.h"
+#include "DummyRobot.h"
+#include "../Simulator/world/MapRobot.h"
 
 const int CERTAINTY_ESTIMATION_THRESHOLD = 2;
 
@@ -34,6 +36,7 @@ private:
     bool useRandomParticles = true;
     double locationCertaintyEstimation = 0;
     bool initialLocationFinished = false;
+    MapRobot* estimatedRobot;
 
     // The following values should be seen as constants for this operator. They might be changed in constructor for some special cases like benchmarking
     bool BENCHMARK_MODE = false;

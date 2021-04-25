@@ -8,6 +8,7 @@
 #include "../Simulator/world/world.h"
 #include "../Simulator/interactive_objects/DistanceSensor.h"
 #include "helpers.h"
+#include "DummyRobot.h"
 
 ParticleFilter::ParticleFilter(RobotControlInterface *robot, std::string map_filename, bool benchmarkMode) {
     this->BENCHMARK_MODE = benchmarkMode;
@@ -26,6 +27,9 @@ ParticleFilter::ParticleFilter(RobotControlInterface *robot, std::string map_fil
     this->particles = ParticleFilter::create_uniform_particles(this->particles_world->get_map_bounds().x,
                                                                this->particles_world->get_map_bounds().y,
                                                                this->N);
+    this->estimatedRobot = new MapRobot(robot->get_radius());
+    this->estimatedRobot->setColor(CV_RGB(255, 255, 255));
+    this->particles_world->addMapObject(this->estimatedRobot);
     ParticleFilter::updateParticleSimulation(this->particles, SHOW_WHATS_GOING_ON);
 }
 
@@ -63,32 +67,45 @@ void ParticleFilter::updateParticleSimulation(std::vector<std::array<double, 3>>
         }
     }
 
-    // create dummy robots representing the particles
-    this->particles_world->clearObjectsList(true);
-    for (int i = 0; i < particles.size(); ++i) {
-        std::array<double, 3> particle = particles[i];
-        // TODO: creating a dummyRobot class would allow updating existing robots. This would allow to avoid recreating everything all the times
-        Robot *dummyRobot = new Robot("particle",
-                                      this->robot->get_radius(),
-                                      this->particles_world,
-                                      cv::Point2d(particle[0], particle[1]),
-                                      particle[2]);
-        // create sensors
-        for (std::array<double, 2> s_config : sensor_config) {
-            DistanceSensor *sensor = new DistanceSensor(this->particles_world, dummyRobot, s_config[0], s_config[1], true);
-            sensor->update_sensor_data(true);
-            dummyRobot->add_sensor(sensor);
+
+    // add or delete robots from the world if the amount does not match
+    if (this->particles_world->getRobotsList().size() > particles.size()) {
+        // there are too many particles -> remove some
+        this->particles_world->deleteRobotByIndex(particles.size(), this->particles_world->getRobotsList().size() - particles.size(), true);
+    } else if (this->particles_world->getRobotsList().size() < particles.size()) {
+        // there arent enough particles -> add some
+        for (long i = this->particles_world->getRobotsList().size(); i<particles.size(); ++i) {
+            // create robot
+            auto* dummyRobot = new DummyRobot("particle", this->robot->get_radius(), this->particles_world);
+            // set default visualization options
+            dummyRobot->setDrawOptions(CV_RGB(255, 0, 0), true, 1);
+            // add robot to world
+            this->particles_world->addRobot(dummyRobot);
+
+            // create sensors
+            for (std::array<double, 2> s_config : sensor_config) {
+                DistanceSensor *sensor = new DistanceSensor(this->particles_world, dummyRobot, s_config[0], s_config[1], true);
+                sensor->update_sensor_data(true);
+                dummyRobot->add_sensor(sensor);
+            }
         }
+    }
+
+    // update robots
+    std::vector<Robot*> dummyRobotsList = this->particles_world->getRobotsList();
+    for (int i = 1; i < particles.size(); ++i) { // again: 1 to skip the estimation robot
+        std::array<double, 3> particle = particles[i];
+        DummyRobot* dummyRobot = (DummyRobot*) dummyRobotsList[i];
+        dummyRobot->reposition(particle[0], particle[1], particle[2]);
 
         // set custom visualization options
         if (useCustomWeightColors) {
             dummyRobot->setDrawOptions(getColor(weights[i] / maxWeight), true, 1);
-        } else {
-            dummyRobot->setDrawOptions(CV_RGB(255, 0, 0), true, 1);
         }
 
-        // add robot to simulation world
-        this->particles_world->add_object(dummyRobot);
+        for (SensorInterface* sensor : dummyRobot->get_sensors()) {
+            sensor->update_sensor_data(true);
+        }
     }
 
     // show map if enabled
@@ -141,15 +158,12 @@ std::vector<double> ParticleFilter::particles_update(std::vector<double> robotSe
     for (int i = 0; i < updated_weights.size(); ++i) {
         // collect sensor values of simulated particles
         std::vector<DistanceSensor *> sensors = DistanceSensor::filter_for_distance_sensor(simRobots.at(i)->get_sensors());
-        std::vector<double> simulationSensorValues = {};
+        int j = 0;
         for (DistanceSensor *sensor : sensors) {
-            simulationSensorValues.push_back(sensor->get_simplified_sensor_value());
-        }
-
-        // calculate correlation
-        for (int j = 0; j < simulationSensorValues.size(); ++j) {
-            updated_weights[i] *= boost::math::pdf(d, abs(simulationSensorValues[j] - robotSensorValues[j]));
+            // calculate correlation
+            updated_weights[i] *= boost::math::pdf(d, abs(sensor->get_simplified_sensor_value() - robotSensorValues[j]));
             updated_weights[i] += 1.e-300; // prevent rounding to 0
+            j++;
         }
 
         sumOfWeights += updated_weights[i];
@@ -251,7 +265,6 @@ ParticleEvaluationData ParticleFilter::update(double distance, double angle) {
         bool finished = false;
         for (int i = 0; !finished && i < this->particles.size(); ++i) {
             finished = true;
-            // TODO: probably replacing "int j = 0" with "int j = i + 1" will improve performance and wont break anything
             for (int j = i+1; j < this->particles.size(); ++j) {
                 if (this->weights[i] < this->weights[j]) {
                     finished = false;
@@ -297,7 +310,7 @@ ParticleEvaluationData ParticleFilter::update(double distance, double angle) {
     this->updateParticleSimulation(updated_particles, false);
 
     // this will do the actual weights update
-    std::vector<double> updated_weights = this->particles_update(robotSensorValues, this->particles_world->get_robots(), 0.01);
+    std::vector<double> updated_weights = this->particles_update(robotSensorValues, this->particles_world->getRobotsList(), 0.01);
 
 
     // calculate estimated position
@@ -325,10 +338,7 @@ ParticleEvaluationData ParticleFilter::update(double distance, double angle) {
     // nice for visualization but will impact performance!
     if (SHOW_WHATS_GOING_ON) {
         this->updateParticleSimulation(updated_particles, false, updated_weights);
-        Robot *estimatedRobot = new Robot("estimation", 8, this->particles_world, cv::Point2d(estimatedParticle[0], estimatedParticle[1]),
-                                          estimatedParticle[2]);
-        estimatedRobot->setDrawOptions(CV_RGB(255, 255, 255));
-        this->particles_world->add_object(estimatedRobot);
+        this->estimatedRobot->reposition(cv::Point2d(estimatedParticle[0], estimatedParticle[1]), estimatedParticle[2]);
         this->particles_world->show_map(true);
     }
 
