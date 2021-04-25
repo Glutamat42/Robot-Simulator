@@ -117,8 +117,10 @@ std::array<double, 3> weightedAverageParticle(std::vector<std::array<double, 3>>
 
 /** Add padding around obstacles. */
 FastMap padObstacles(FastMap map, double radius) {
-    FastMap paddedMap = FastMap(map.getBounds().x, map.getBounds().y);
+    cv::Point2i paddedMapBounds = map.getBounds();
+    FastMap paddedMap = FastMap(paddedMapBounds.x, paddedMapBounds.y);
     FastMap kernel = FastMap((int)ceil(radius) * 2 + 1, (int)ceil(radius) * 2 + 1, false);
+    cv::Point2i kernelBounds = kernel.getBounds();
     cv::Point2i center((int)ceil(radius), (int)ceil(radius)); // center is radius + 1, but we start counting at 0 so it is radius + 1 - 1 = radius
 
     // create circle kernel
@@ -132,20 +134,20 @@ FastMap padObstacles(FastMap map, double radius) {
 
     // apply kernel
     // iterate through all pixels
-    for (int mapX = 0; mapX < map.getBounds().x; ++mapX) {
-        for (int mapY = 0; mapY < map.getBounds().y; ++mapY) {
+    for (int mapX = 0; mapX < paddedMapBounds.x; ++mapX) {
+        for (int mapY = 0; mapY < paddedMapBounds.y; ++mapY) {
             // if current pixel is true the kernel has to be applied to the padded map
             if (map.getPixel(mapX, mapY)) {
                 // iterate through all pixels of the kernel
-                for (int kernelX = 0; kernelX < kernel.getBounds().x; ++kernelX) {
-                    for (int kernelY = 0; kernelY < kernel.getBounds().y; ++kernelY) {
+                for (int kernelX = 0; kernelX < kernelBounds.x; ++kernelX) {
+                    for (int kernelY = 0; kernelY < kernelBounds.y; ++kernelY) {
                         // if current kernel position is not true we dont have to do anything
                         if (kernel.getPixel(kernelX, kernelY)) {
                             int paddedX = mapX + kernelX - center.x - 1; // " - center.x - 1" because the kernel center has to be mapped to the current pixel (offset)
                             int paddedY = mapY + kernelY - center.y - 1;
 
                             // check boundaries
-                            if (paddedX < 0 || paddedY < 0 || paddedX >= map.getBounds().x || paddedY >= map.getBounds().y) continue;
+                            if (paddedX < 0 || paddedY < 0 || paddedX >= paddedMapBounds.x || paddedY >= paddedMapBounds.y) continue;
 
                             // all checks passed: set pixel on new map
                             paddedMap.setPixel(paddedX, paddedY, true);

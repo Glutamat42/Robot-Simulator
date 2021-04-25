@@ -17,7 +17,7 @@ AStar::AStar(std::string map_filename, double paddingRadius) {
 
     FastMap paddedMap = padObstacles(FastMap(grayscaleMap), paddingRadius);
     this->scaledAndPaddedMap = paddedMap.getDownScaledMap(MAP_SCALING);
-    // This approach is a little faster but the result works not so good
+
 //    this->scaledAndPaddedMap = padObstacles(FastMap(grayscaleMap).getDownScaledMap(MAP_SCALING),paddingRadius / MAP_SCALING);
 
     if (SHOW_WHATS_GOING_ON) {

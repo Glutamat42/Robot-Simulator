@@ -23,8 +23,8 @@ int main() {
 //    SimulationScenario* scenario = new TestRobots();
 //    SimulationScenario* scenario = new RobotArmy();
 //    SimulationScenario* scenario = new ParticleScenario();
-//    SimulationScenario* scenario = new AStarScenario();
-    SimulationScenario* scenario = new SelfDrivingScenario();
+    SimulationScenario* scenario = new AStarScenario();
+//    SimulationScenario* scenario = new SelfDrivingScenario();
     scenario->setUp();
     scenario->startLoop();
 

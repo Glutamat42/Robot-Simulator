@@ -8,7 +8,7 @@
 
 #include "FastMap.h"
 
-const int MAP_SCALING = 6;  // scaled map size = 1/MAP_SCALING
+const int MAP_SCALING = 2;  // scaled map size = 1/MAP_SCALING
 
 struct AdjacencyTarget {
     cv::Point2i position;
@@ -34,7 +34,6 @@ struct AStarElement {
 
 class AStar {
 private:
-//    FastMap map;
     FastMap scaledAndPaddedMap;
 
     // adjacency list
