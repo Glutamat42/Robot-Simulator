@@ -99,7 +99,7 @@ std::vector <AStarElement> FastAStar::runAStar() {
     }
 
     while (true) {
-        if (SHOW_WHATS_GOING_ON && loopCounter % 500 == 0) {
+        if (SHOW_WHATS_GOING_ON && loopCounter % 5000 == 0) {
             // show current open and closed list on map
             // inefficient, but "good enough"
             for (int x = 0; x <this->scaledMapBounds.x; ++x) {
