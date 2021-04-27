@@ -5,4 +5,4 @@ This project goes beyond the scope of the exercises of this lecture and includes
 
 Parts of this project are based on the solutions of Prof. Dr.-Ing. Jürgen Brauer. These can be found here: https://github.com/juebrauer (especially https://github.com/juebrauer/teaching_mobile_robots)
 #Setup
-requires libboost-dev
+requires libboost-dev libopencv-dev

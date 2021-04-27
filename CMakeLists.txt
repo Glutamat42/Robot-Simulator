@@ -3,12 +3,8 @@ project(mr_cpp_code)
 
 set(CMAKE_CXX_STANDARD 20)
 
-find_package(OpenCV REQUIRED PATHS "/home/markus/opencv/install")
-
-message(STATUS "OpenCV library status:")
-message(STATUS "    version: ${OpenCV_VERSION}")
-message(STATUS "    libraries: ${OpenCV_LIBS}")
-message(STATUS "    include path: ${OpenCV_INCLUDE_DIRS}")
+find_package(OpenCV REQUIRED)
+include_directories(${OpenCV_INCLUDE_DIRS})
 
 configure_file(assets/maps/world1.png assets/maps/world1.png COPYONLY)
 
