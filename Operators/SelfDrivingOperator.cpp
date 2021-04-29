@@ -16,7 +16,7 @@ SelfDrivingOperator::SelfDrivingOperator(RobotControlInterface *robot,
                                          std::string map_filename,
                                          bool benchmarkMode) : RobotOperator(robot),
                                                                particleFilter(robot, map_filename, benchmarkMode),
-                                                               aStar(map_filename, robot->get_radius() + EXTRA_PADDING
+                                                               aStar(map_filename, robot->get_radius() + EXTRA_PADDING, 2
                                                                ) {
     this->secondOperator = new BasicWithNovelty(robot);
     this->positionHistory = boost::circular_buffer<cv::Point2d>(UNSTUCK_HISTORY_DURATION_IN_SECONDS * GAME_TPS);

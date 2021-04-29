@@ -22,6 +22,7 @@ struct AStarElement {
 };
 struct AStarDatapoint {
     std::vector<AdjacencyTarget> adjacencyTargets;
+//    std::vector<AdjacencyTarget> adjacencyTargets = std::vector<AdjacencyTarget>(8);  // creating adjacency List can be sped up quite a bit by reserving memory first, but this will also significantly increase the memory consumption
 
     AStarElement aStarElement;
 };

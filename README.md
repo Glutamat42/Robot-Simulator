@@ -4,5 +4,10 @@ This project contains my solutions position the exercises of the lecture Mobile 
 This project goes beyond the scope of the exercises of this lecture and includes e.g. topics from the lecture Multimodal Sensor Systems.
 
 Parts of this project are based on the solutions of Prof. Dr.-Ing. Jürgen Brauer. These can be found here: https://github.com/juebrauer (especially https://github.com/juebrauer/teaching_mobile_robots)
-#Setup
+# Setup
 requires libboost-dev libopencv-dev
+
+# Other implementations
+https://github.com/mjl/particle_filter_demo/tree/06c3c35e20df9e0d6e5d1d6eea861d51d8bba115
+
+https://github.com/behnamasadi/Filters
