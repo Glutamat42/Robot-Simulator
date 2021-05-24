@@ -10,18 +10,13 @@
 #include "helpers.h"
 #include "DummyRobot.h"
 
-ParticleFilter::ParticleFilter(RobotControlInterface *robot, std::string map_filename, bool benchmarkMode) {
-    this->BENCHMARK_MODE = benchmarkMode;
+ParticleFilter::ParticleFilter(RobotControlInterface *robot, std::string map_filename, int initialN, int targetN) {
     this->particles_world = new World(map_filename, "Particle filter");
     this->particles_world->addMapObject(this->mapLine);
     this->robot = robot;
 
-    if (this->BENCHMARK_MODE) {
-        this->INIT_N = 5000;
-        this->TARGET_N = 200;
-        this->TARGET_SHOULD_BE_REACHED_AFTER_ITERS = 150;
-    }
-    this->N = INIT_N;
+    this->N = initialN;
+    this->TARGET_N = targetN;
 
     // create initial particles distribution and show the simulation map
     this->particles = ParticleFilter::create_uniform_particles(this->particles_world->get_map_bounds().x,
@@ -71,7 +66,7 @@ void ParticleFilter::updateParticleSimulation(std::vector<std::array<double, 3>>
     // add or delete robots from the world if the amount does not match
     if (this->particles_world->getRobotsList().size() > particles.size()) {
         // there are too many particles -> remove some
-        this->particles_world->deleteRobotByIndex(particles.size(), this->particles_world->getRobotsList().size() - particles.size(), true);
+        this->particles_world->deleteRobotByIndex(particles.size() - 1, this->particles_world->getRobotsList().size() - particles.size() + 1, true);
     } else if (this->particles_world->getRobotsList().size() < particles.size()) {
         // there arent enough particles -> add some
         for (long i = this->particles_world->getRobotsList().size(); i<particles.size(); ++i) {
@@ -85,7 +80,6 @@ void ParticleFilter::updateParticleSimulation(std::vector<std::array<double, 3>>
             // create sensors
             for (std::array<double, 2> s_config : sensor_config) {
                 DistanceSensor *sensor = new DistanceSensor(this->particles_world, dummyRobot, s_config[0], s_config[1], true);
-                sensor->update_sensor_data(true);
                 dummyRobot->add_sensor(sensor);
             }
         }
@@ -93,7 +87,7 @@ void ParticleFilter::updateParticleSimulation(std::vector<std::array<double, 3>>
 
     // update robots
     std::vector<Robot*> dummyRobotsList = this->particles_world->getRobotsList();
-    for (int i = 1; i < particles.size(); ++i) { // again: 1 to skip the estimation robot
+    for (int i = 0; i < particles.size(); ++i) {
         std::array<double, 3> particle = particles[i];
         DummyRobot* dummyRobot = (DummyRobot*) dummyRobotsList[i];
         dummyRobot->reposition(particle[0], particle[1], particle[2]);
@@ -112,10 +106,6 @@ void ParticleFilter::updateParticleSimulation(std::vector<std::array<double, 3>>
     if (showMap) {
         this->particles_world->show_map(true);
     }
-}
-
-ParticleEvaluationData ParticleFilter::update() {
-    return this->update(this->robot->get_last_tick_movement_distance(), this->robot->get_last_tick_movement_angle());
 }
 
 std::vector<std::array<double, 3>> ParticleFilter::particles_predict(std::vector<std::array<double, 3>> *oldParticles,
@@ -231,68 +221,68 @@ std::tuple<std::vector<std::array<double, 3>>, std::vector<double>> ParticleFilt
         weights->at(indexes[i]) /= weightSum;
     }
 
-    // replace random particles with random values to allow recovery in case the detection went horribly wrong
-    // TODO: use particles with lowest weight to replace
-    if (enableRandomParticles && mapBounds != cv::Point2d()) {
-        std::vector<std::array<double, 3>> randomParticles = create_uniform_particles(mapBounds.x,
-                                                                                      mapBounds.y,
-                                                                                      N / 100);
-        std::uniform_int_distribution<int> uniformIndexCreator(0, N);
-        for (int i = 0; i < N / 100; ++i) {
-            updatedParticles[uniformIndexCreator(generator)] = randomParticles[i];
-        }
-    }
-
     return std::tuple<std::vector<std::array<double, 3>>, std::vector<double>>(updatedParticles, updatedWeights);
 }
 
 
+ParticleEvaluationData ParticleFilter::update() {
+    return this->update(this->robot->get_last_tick_movement_distance(), this->robot->get_last_tick_movement_angle());
+}
+
+
 ParticleEvaluationData ParticleFilter::update(double distance, double angle) {
-    // slowly decrease the amount of used particles. This allows starting with a large number and still provide good performance in the long term.
-    // the most critical situation is the initial localization. Afterwards it seems to be pretty stable even with a really slow amount of particles
-    if (!this->initialLocationFinished && this->iterationsCounter <= TARGET_SHOULD_BE_REACHED_AFTER_ITERS && this->iterationsCounter > 0) {
-        // check uncertainty metric if location seems to be already successful
-        if (locationCertaintyEstimation > CERTAINTY_ESTIMATION_THRESHOLD) {
+    // check if in location finding phase
+    int removeElementsCount = N * INITIAL_PHASE_REPLACE_SHARE;;
+    if (!this->initialLocationFinished && this->iterationsCounter > 0) {
+        // check if location is found
+        if (this->locationCertaintyEstimation > CERTAINTY_ESTIMATION_THRESHOLD) {
+            // check uncertainty metric if location seems to be already successful
+            std::cout << "Found location" << std::endl;
             this->initialLocationFinished = true;
             this->N = TARGET_N;
             this->useRandomParticles = false;
         }
 
-        int removeElementsCount = (INIT_N - TARGET_N) / TARGET_SHOULD_BE_REACHED_AFTER_ITERS;
-        this->N -= removeElementsCount;
-
-        // bubble sort
-        // could be replaced with a more efficient algorithm if its computationally too expensive
-        bool finished = false;
-        for (int i = 0; !finished && i < this->particles.size(); ++i) {
-            finished = true;
-            for (int j = i+1; j < this->particles.size(); ++j) {
-                if (this->weights[i] < this->weights[j]) {
-                    finished = false;
-                    double tmpWeight = this->weights[i];
-                    std::array<double, 3> tmpParticle = this->particles[i];
-                    this->weights[i] = this->weights[j];
-                    this->weights[j] = tmpWeight;
-                    this->particles[i] = this->particles[j];
-                    this->particles[j] = tmpParticle;
+        // if location not yet found: select the worst rated particles and replace them with random
+        if (!this->initialLocationFinished) {
+            // bubble sort
+            // could be replaced with a more efficient algorithm if its computationally too expensive
+            bool finished = false;
+            for (int i = 0; !finished && i < this->particles.size(); ++i) {
+                finished = true;
+                for (int j = i + 1; j < this->particles.size(); ++j) {
+                    if (this->weights[i] > this->weights[j]) {
+                        finished = false;
+                        double tmpWeight = this->weights[i];
+                        std::array<double, 3> tmpParticle = this->particles[i];
+                        this->weights[i] = this->weights[j];
+                        this->weights[j] = tmpWeight;
+                        this->particles[i] = this->particles[j];
+                        this->particles[j] = tmpParticle;
+                    }
                 }
             }
-        }
 
-        // drop the first particles (lowest probability)
-        this->weights.erase(this->weights.begin(), this->weights.begin() + removeElementsCount);
-        this->particles.erase(this->particles.begin(), this->particles.begin() + removeElementsCount);
+            // drop the first particles (lowest probability)
+            this->weights.erase(this->weights.begin(), this->weights.begin() + removeElementsCount);
+            this->particles.erase(this->particles.begin(), this->particles.begin() + removeElementsCount);
 
-        // if this is the last step of decaying particles also disable the random particles. If the robot still not found his location
-        // then everything is already lost anyways
-        if (this->iterationsCounter == TARGET_SHOULD_BE_REACHED_AFTER_ITERS) {
-            this->useRandomParticles = false;
+            // replace random particles with random values to allow recovery in case the detection went horribly wrong
+            // TODO: use particles with lowest weight to replace
+            std::vector<std::array<double, 3>> randomParticles = create_uniform_particles(this->particles_world->get_map_bounds().x,
+                                                                                          this->particles_world->get_map_bounds().y,
+                                                                                          removeElementsCount);
+            for (int i = 0; i < randomParticles.size(); ++i) {
+                this->particles.push_back(randomParticles[i]);
+                this->weights.push_back(0); // weight doesnt matter, will be recalculated before used
+            }
+            // END: select the worst rated particles and replace them with random
         }
-    } else if (this->iterationsCounter == TARGET_SHOULD_BE_REACHED_AFTER_ITERS + 1 && locationCertaintyEstimation < CERTAINTY_ESTIMATION_THRESHOLD) {
-        std::cout << "Localization probably failed";
     }
     this->iterationsCounter++;
 
+
+    // Begin of actual particle filter steps
 
     // Particle Filter Step 1) particle prediction: apply estimated movement distance / angle (currently in this simulator there is no noise for those values)
     std::vector<std::array<double, 3>> updated_particles = particles_predict(&this->particles,
@@ -313,9 +303,27 @@ ParticleEvaluationData ParticleFilter::update(double distance, double angle) {
     // this will do the actual weights update
     std::vector<double> updated_weights = this->particles_update(robotSensorValues, this->particles_world->getRobotsList(), 0.01);
 
+    // Particle Filter Step 3) resample: create new particles based on the weights. They will be mostly around the most previous particles with the highest weight.
+    std::tuple<std::vector<std::array<double, 3>>, std::vector<double>> resampledTuple = this->particles_resample(&updated_particles,
+                                                                                                                  &updated_weights,
+                                                                                                                  this->N,
+                                                                                                                  this->useRandomParticles,
+                                                                                                                  5,
+                                                                                                                  this->particles_world->get_map_bounds());
+
+    // END of actual particle filter steps
+
 
     // calculate estimated position
-    std::array<double, 3> estimatedParticle = weightedAverageParticle(updated_particles, updated_weights);
+    std::array<double, 3> estimatedParticle{};
+    if (!this->initialLocationFinished) {
+        // if in the initial phase: only the first x particles are relevant, the others are random
+        int relevantParticlesCount = N - removeElementsCount;
+        estimatedParticle = weightedAverageParticle(std::vector<std::array<double,3>>(updated_particles.begin(), updated_particles.begin()+relevantParticlesCount), std::vector<double>(updated_weights.begin(), updated_weights.begin()+relevantParticlesCount));
+    } else {
+        estimatedParticle = weightedAverageParticle(updated_particles, updated_weights);
+    }
+
 
     // estimate whether the prediction is probably already accurate and if yes, add to history, if not: clear history
     // also visualize it on the map as a line
@@ -325,9 +333,9 @@ ParticleEvaluationData ParticleFilter::update(double distance, double angle) {
         double distanceFromLastEstimation = pow(this->estimationHistory.back()[0] - estimatedParticle[0], 2) + pow(this->estimationHistory.back()[1] - estimatedParticle[1], 2);
         if (distanceFromLastEstimation >= maxAcceptableMovementDistance) {
             this->estimationHistory.clear();
-            this->locationCertaintyEstimation = this->locationCertaintyEstimation > 0 ? this->locationCertaintyEstimation - 1 / GAME_TPS : 0;
-            if (SHOW_WHATS_GOING_ON) this->mapLine->clearPoints();
-            std::cout << "location probably not yet found" << std::endl;
+            this->locationCertaintyEstimation = this->locationCertaintyEstimation > 0 ? this->locationCertaintyEstimation - 5 / GAME_TPS : 0;
+            if (SHOW_WHATS_GOING_ON && !this->initialLocationFinished) this->mapLine->clearPoints();
+            std::cout << "Estimated location jumped too far, this is an indication for a wrong location estimation" << std::endl;
         } else {
             this->locationCertaintyEstimation = this->locationCertaintyEstimation < 10 ? this->locationCertaintyEstimation + 1 / GAME_TPS : 10;
         }
@@ -343,19 +351,11 @@ ParticleEvaluationData ParticleFilter::update(double distance, double angle) {
         this->particles_world->show_map(true);
     }
 
-    // Particle Filter Step 3) resample: create new particles based on the weights. They will be mostly around the most previous particles with the highest weight.
-    std::tuple<std::vector<std::array<double, 3>>, std::vector<double>> resampledTuple = this->particles_resample(&updated_particles,
-                                                                                                                  &updated_weights,
-                                                                                                                  this->N,
-                                                                                                                  this->useRandomParticles,
-                                                                                                                  5,
-                                                                                                                  this->particles_world->get_map_bounds());
+
     // save particles and weights
     this->particles = std::get<0>(resampledTuple);
     this->weights = std::get<1>(resampledTuple);
 
-    // exit if benchmark mode and 200 iterations passed
-    if (this->BENCHMARK_MODE && this->iterationsCounter == 199) exit(0);
 
     return ParticleEvaluationData({cv::Point2d(estimatedParticle[0], estimatedParticle[1]), estimatedParticle[2], locationCertaintyEstimation >= CERTAINTY_ESTIMATION_THRESHOLD});
 }

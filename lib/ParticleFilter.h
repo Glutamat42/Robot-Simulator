@@ -12,7 +12,8 @@
 #include "DummyRobot.h"
 #include "../Simulator/world/MapRobot.h"
 
-const int CERTAINTY_ESTIMATION_THRESHOLD = 2;
+const int CERTAINTY_ESTIMATION_THRESHOLD = 3;
+const float INITIAL_PHASE_REPLACE_SHARE = 0.75; // between 0 and 1
 
 struct ParticleEvaluationData {
     cv::Point2d currentLocation;
@@ -38,11 +39,7 @@ private:
     bool initialLocationFinished = false;
     MapRobot* estimatedRobot;
 
-    // The following values should be seen as constants for this operator. They might be changed in constructor for some special cases like benchmarking
-    bool BENCHMARK_MODE = false;
-    int INIT_N = 7500;  // The following variables are required for the decaying particles functionality
     int TARGET_N = 250;
-    int TARGET_SHOULD_BE_REACHED_AFTER_ITERS = 200;
 
     // -- functions --
 
@@ -84,7 +81,14 @@ private:
     std::tuple<std::vector<std::array<double, 3>>, std::vector<double>> static
     particles_resample(std::vector<std::array<double, 3>> *oldParticles, std::vector<double> *weights, int N, bool enableRandomParticles = false, double noise = 10, cv::Point2d mapBounds = cv::Point2d());
 public:
-    ParticleFilter(RobotControlInterface *robot, std::string map_filename, bool benchmarkMode);
+    /**
+     *
+     * @param robot
+     * @param map_filename
+     * @param initialN Particles for the first phase (find location of robot)
+     * @param targetN Particles count after the first phase (follow the movements of the robot)
+     */
+    ParticleFilter(RobotControlInterface *robot, std::string map_filename, int initialN = 750, int targetN = 250);
 
     /** calling this function will do one update step of the prediction
      *

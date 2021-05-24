@@ -15,9 +15,10 @@ const double UNSTUCK_STUCK_IF_MOVED_LESS_THAN = 8;
 SelfDrivingOperator::SelfDrivingOperator(RobotControlInterface *robot,
                                          std::string map_filename,
                                          bool benchmarkMode) : RobotOperator(robot),
-                                                               particleFilter(robot, map_filename, benchmarkMode),
+                                                               particleFilter(robot, map_filename),
                                                                aStar(map_filename, robot->get_radius() + EXTRA_PADDING, 2
                                                                ) {
+    if (benchmarkMode) std::cout << "Benchmark mode support has been removed from the particle filter class. If required implement it on Scenario/Operator level" << std::endl;
     this->secondOperator = new BasicWithNovelty(robot);
     this->positionHistory = boost::circular_buffer<cv::Point2d>(UNSTUCK_HISTORY_DURATION_IN_SECONDS * GAME_TPS);
 }

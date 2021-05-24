@@ -12,7 +12,8 @@
 using namespace std::chrono;
 
 
-ParticleOperator::ParticleOperator(RobotControlInterface *robot, std::string map_filename, bool benchmarkMode) : RobotOperator(robot), particleFilter(robot, map_filename, benchmarkMode) {
+ParticleOperator::ParticleOperator(RobotControlInterface *robot, std::string map_filename, bool benchmarkMode) : RobotOperator(robot), particleFilter(robot, map_filename) {
+    if (benchmarkMode) std::cout << "Benchmark mode support has been removed from the particle filter class. If required implement it on Scenario/Operator level" << std::endl;
     this->secondOperator = new BasicWithNovelty(robot);
 }
 

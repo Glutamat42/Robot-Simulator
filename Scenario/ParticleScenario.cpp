@@ -18,7 +18,7 @@ void ParticleScenario::setUp() {
                   << "IMPORTANT: To get comparable values the constants (eg tps) have to be the same. They are not automatically by enabling the benchmark mode!"
                   << std::endl;
 
-        Robot *r = new Robot(std::string("r1"), 8, cv::Point2d(310.0, 300.0), 1.0 * M_PI, world, M_PI / 2, 40);
+        Robot *r = new Robot(std::string("r1"), 8, cv::Point2d(310.0, 300.0), 0.9 * M_PI, world, M_PI / 2, 40);
         DistanceSensor *s1 = new DistanceSensor(world, r, 0.15 * M_PI, 800);
         DistanceSensor *s2 = new DistanceSensor(world, r, 0.25 * M_PI, 800);
         DistanceSensor *s3 = new DistanceSensor(world, r, -0.15 * M_PI, 800);
