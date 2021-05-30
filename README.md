@@ -38,6 +38,18 @@ Utilizing the estimated location and orientation the robot will start to navigat
 ![particle filter animation](./docs/assets/particle-filter.gif)
 
 
+# Other features
+This might or might not be a complete list of further features ;)
+
+## Value Iteration
+Currently, there is an incomplete implementation of the Reinforcement learning algorithm _Value Iteration_.
+The algorithm is working, but there are still some bugs and incomplete functions (eg the path calculation is incomplete).
+
+![Value Iteration](./docs/assets/ValueIteration.png)
+
+On a map scaling of 2 (1/2 - 400x400 px) and without graphical output one iteration takes around 250ms. 
+The code is not performance optimized, so there is plenty of room for improvement.
+
 
 # Useful
 ## Other particle filter implementations
