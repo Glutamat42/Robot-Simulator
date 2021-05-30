@@ -25,10 +25,7 @@ protected:
 
     void generateAdjacencyList(bool enableDiagonalTransition);
 
-    std::vector<cv::Point2d> path;
-
     PathFindingDataMap<T> dataMap;
-
 public:
     /**
      *
@@ -38,9 +35,8 @@ public:
      * @param enableDiagonalTransition if enabled diagonal transitions between points will be added to adjacency list with a weight of around 1.41, otherwise only direct neighbors will be added
      */
     PathFindingAlgorithm(std::string map_filename, double paddingRadius, unsigned int mapScaling = 1, bool enableDiagonalTransition = true);
-    virtual void run() = 0;
 
-    std::vector<cv::Point2d> getPath();
+    virtual std::vector<cv::Point2d> run() = 0;
 
     /** get the map scaling factor */
     unsigned int getMapScaling();

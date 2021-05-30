@@ -8,14 +8,28 @@
 #include <utility>
 
 #include "../FastMap.h"
-#include "AStarDataMap.h"
 #include "AStarDataStructures.h"
-#include "../ValueIteration/PathFindingAlgorithm.h"
+#include "../PathFindingAlgorithm/PathFindingAlgorithm.h"
 #include "../helpers.h"
 
 
 class FastAStar: public PathFindingAlgorithm<AStarElement> {
 private:
+    /** This will run the A* loop
+     *
+     * @return points of shortest path starting from the target position. Coordinates are from the scaled map!
+     */
+    std::vector<AStarElement> runAStar();
+
+    /** rescale the points to the original map resolution, resort array (first element -> startPos) and get only the points
+     *
+     */
+    std::vector<cv::Point2d> aStarListToPointList(std::vector<AStarElement> path);
+
+    /** update visualization of the map with the current f_cost
+     *
+     * @param image
+     */
     void updateMap(cv::Mat* image);
 
     // <f_cost, heuristic, index>
@@ -27,7 +41,6 @@ private:
     long targetIndex;
     double heuristicBias;
 public:
-    using PathFindingAlgorithm<AStarElement>::PathFindingAlgorithm::getMapScaling;
     /**
      *
      * @param map_filename
@@ -43,18 +56,7 @@ public:
      */
     bool setAStarParameters(cv::Point2i startPosition, cv::Point2i targetPosition, double bias = 1.0);
 
-    /** This will run the A* loop
-     *
-     * @return points of shortest path starting from the target position. Coordinates are from the scaled map!
-     */
-    std::vector<AStarElement> runAStar();
-
-    void run() override;
-
-    /** rescale the points to the original map resolution, resort array (first element -> startPos) and get only the points
-     *
-     */
-    std::vector<cv::Point2d> aStarListToPointList(std::vector<AStarElement> path);
+    std::vector<cv::Point2d> run() override;
 };
 
 

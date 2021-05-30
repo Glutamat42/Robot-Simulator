@@ -3,21 +3,11 @@
 //
 
 #include "FastAStar.h"
-#include "../ValueIteration/PathFindingAlgorithm.cpp"
 
 
 FastAStar::FastAStar(std::string map_filename, double paddingRadius, unsigned int mapScaling) : PathFindingAlgorithm<AStarElement>(map_filename, paddingRadius, mapScaling) {
 
 }
-
-const int neighbors[8][2] = {{-1, -1},
-                             {-1, 1},
-                             {1,  -1},
-                             {1,  1},
-                             {0,  -1},
-                             {-1, 0},
-                             {1,  0},
-                             {0,  1}};
 
 bool FastAStar::setAStarParameters(cv::Point2i startPosition, cv::Point2i targetPosition, double bias) {
     cv::Point2i _startPos = startPosition / this->mapScaling;
@@ -35,7 +25,7 @@ bool FastAStar::setAStarParameters(cv::Point2i startPosition, cv::Point2i target
 
     if (bias != 1.0) std::cout << "Using heuristic bias of " << this->heuristicBias << std::endl;
 
-//    this->dataMap.resetData();  // TODO: probably not required
+    this->dataMap.resetData();  // required for 2nd (and further) A* runs
     this->aStarOpenListSet.clear();
 
     // add startPos to openList
@@ -170,6 +160,6 @@ std::vector <cv::Point2d> FastAStar::aStarListToPointList(std::vector<AStarEleme
     return pointsList;
 }
 
-void FastAStar::run() {
-    this->path = this->aStarListToPointList(this->runAStar());
+std::vector<cv::Point2d> FastAStar::run() {
+    return this->aStarListToPointList(this->runAStar());
 }

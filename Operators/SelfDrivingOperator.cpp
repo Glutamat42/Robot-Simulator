@@ -70,7 +70,7 @@ void SelfDrivingOperator::update() {
     // use A* to find a path
     if (this->path.empty()) {
         if(this->aStar.setAStarParameters(particleFilterEstimation.currentLocation, targetPosition)) {
-            this->path = this->aStar.aStarListToPointList(this->aStar.runAStar());
+            this->path = this->aStar.run();
             this->waypointId = 0;
         }
     }

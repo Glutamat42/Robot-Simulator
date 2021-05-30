@@ -69,9 +69,4 @@ unsigned int PathFindingAlgorithm<T>::getMapScaling() {
     return this->mapScaling;
 }
 
-template <class T>
-std::vector<cv::Point2d> PathFindingAlgorithm<T>::getPath() {
-    return this->path;
-}
-
 template class PathFindingAlgorithm<AStarElement>;

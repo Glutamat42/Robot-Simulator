@@ -10,10 +10,6 @@ struct AdjacencyTarget {
     double weight;
 };
 
-struct PathFindingElement {  // TODO: i think this isn't used anymore
-//    virtual void test() = 0;
-};
-
 template <class T>
 struct PathFindingDatapoint {
     std::vector<AdjacencyTarget> adjacencyTargets;
