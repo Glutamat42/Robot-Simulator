@@ -10,19 +10,16 @@
 #include "../FastMap.h"
 #include "AStarDataMap.h"
 #include "AStarDataStructures.h"
+#include "../ValueIteration/PathFindingAlgorithm.h"
+#include "../helpers.h"
 
-class FastAStar {
+
+class FastAStar: public PathFindingAlgorithm<AStarElement> {
 private:
-    int mapScaling;  // scaled map size = 1/MAP_SCALING
-    FastMap scaledAndPaddedMap;
-    cv::Point2i scaledMapBounds;
+    void updateMap(cv::Mat* image);
 
-    AStarDataMap aStarMap;
     // <f_cost, heuristic, index>
     std::set<std::tuple<double, double, long>> aStarOpenListSet;
-
-    // adjacency list
-    void generateAdjacencyList();
 
     // AStar
     cv::Point2i startPos;
@@ -30,6 +27,7 @@ private:
     long targetIndex;
     double heuristicBias;
 public:
+    using PathFindingAlgorithm<AStarElement>::PathFindingAlgorithm::getMapScaling;
     /**
      *
      * @param map_filename
@@ -51,13 +49,12 @@ public:
      */
     std::vector<AStarElement> runAStar();
 
+    void run() override;
+
     /** rescale the points to the original map resolution, resort array (first element -> startPos) and get only the points
      *
      */
     std::vector<cv::Point2d> aStarListToPointList(std::vector<AStarElement> path);
-
-    /** get the map scaling factor */
-    unsigned int getMapScaling();
 };
 
 

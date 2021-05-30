@@ -5,12 +5,27 @@
 #ifndef MR_CPP_CODE_ASTARDATASTRUCTURES_H
 #define MR_CPP_CODE_ASTARDATASTRUCTURES_H
 
-struct AdjacencyTarget {
-    long index;
-    double weight;
-};
+#include "../ValueIteration/PathFindingDataStructures.h"
 
-struct AStarElement {
+
+struct AStarElement : public PathFindingElement {
+    AStarElement(long prevIndex = 0,
+                 double heuristic = 0,
+                 double distance = 0,
+                 double f_cost = 0,
+                 bool startNode=false,
+                 bool isOpenList=false,
+                 bool isClosedList=false,
+                 cv::Point2i position=cv::Point2i (0,0)){
+        this->prevIndex = prevIndex;
+        this->heuristic = heuristic;
+        this->distance = distance;
+        this->f_cost = f_cost;
+        this->startNode = startNode;
+        this->isOpenList = isOpenList;
+        this->isClosedList = isClosedList;
+        this->position = position;
+    };
     long prevIndex=0;
     double heuristic=0;
     double distance=0;
@@ -19,12 +34,9 @@ struct AStarElement {
     bool isOpenList = false;
     bool isClosedList = false;
     cv::Point2i position = cv::Point2i(0,0);  // only used after A* pathfinding completed
-};
-struct AStarDatapoint {
-    std::vector<AdjacencyTarget> adjacencyTargets;
-//    std::vector<AdjacencyTarget> adjacencyTargets = std::vector<AdjacencyTarget>(8);  // creating adjacency List can be sped up quite a bit by reserving memory first, but this will also significantly increase the memory consumption
 
-    AStarElement aStarElement;
+//    void test() {};
 };
+
 
 #endif //MR_CPP_CODE_ASTARDATASTRUCTURES_H
