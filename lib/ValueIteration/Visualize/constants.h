@@ -6,7 +6,7 @@
 #define MR_CPP_CODE_CONSTANTS_H
 
 const unsigned int FIELD_WIDTH = 70;
-const unsigned int FIELD_HEIGHT = 50;
+const unsigned int FIELD_HEIGHT = 40;
 const unsigned int BORDER_WIDTH = 4;
 const unsigned int TABLE_BORDER_WIDTH = 5;
 

@@ -92,6 +92,7 @@ void ValueIteration::setParams(cv::Point2i startPos,
                                                                                                     p.y + neighborOffset[2][1]);
                 if (!neighborTarget->element.validField) continue; // is wall: skip
 
+                // TODO: will probably fail if the current field is at the map border (eg (0,x))
                 double actionRewardMain = this->probabilityOfDesiredMovement * neighborTarget->element.V[iterations];
                 double actionRewardLeft = (1 - this->probabilityOfDesiredMovement) / 2 *  (neighborLeft->element.validField ? neighborLeft->element.V[iterations] : currentDataPoint->element.V[iterations]);
                 double actionRewardRight = (1 - this->probabilityOfDesiredMovement) / 2 * (neighborRight->element.validField ? neighborRight->element.V[iterations] : currentDataPoint->element.V[iterations]);
