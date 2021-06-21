@@ -19,6 +19,8 @@ public:
 
     virtual ~RobotOperator() = default;
 
+    virtual void afterUpdate() {};
+
     virtual void update() = 0;
 };
 

@@ -24,6 +24,8 @@ public:
 
     virtual void setUp() = 0;
 
+    virtual void afterUpdate() {}; // called after the current simulation step, but before things like perf measurement
+
     void startLoop();
 };
 

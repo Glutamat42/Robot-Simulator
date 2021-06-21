@@ -52,6 +52,13 @@ void SimulationScenario::startLoop() {
             sensor->update_sensor_data(false);
         }
 
+        // provide an easy way to do something after the current simulation step
+        for (RobotOperator* robotOperator: robotOperators) {
+            robotOperator->afterUpdate();
+        }
+        this->afterUpdate();
+
+
         world->show_map();
 
         // simple pause function
