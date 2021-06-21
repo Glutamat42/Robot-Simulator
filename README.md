@@ -53,7 +53,7 @@ In both variants there is a huge negative reward for not moving.
 
 The simulation ran with an unlimited speed multiplier (-> as fast possible).
 
-![Q-Learning animation](docs/assets/qlearning.mp4)
+![Q-Learning animation](docs/assets/qlearning.gif)
 
 ## Value Iteration
 Currently, there is an incomplete implementation of the Reinforcement learning algorithm _Value Iteration_.
