@@ -41,6 +41,20 @@ Utilizing the estimated location and orientation the robot will start to navigat
 # Other features
 This might or might not be a complete list of further features ;)
 
+## Q-Learning
+Q-Learning is working, but would require some more work to be fully (and with good code quality) implemented.
+The implemented algorithm targets on just driving around without colliding with walls (or stop otherwise from moving).
+
+I tried two reward variants. 
+The first variant (right version in the video) gives more reward if the robot moves further away from the spawn.
+The second variant (left version) simply gives reward for the moved distance in the last tick (1/10 of a second).
+The latter variant only drove circles. To compensate that problem I gave negative reward for turning in this variant.
+In both variants there is a huge negative reward for not moving.
+
+The simulation ran with an unlimited speed multiplier (-> as fast possible).
+
+![Q-Learning animation](docs/assets/qlearning.mp4)
+
 ## Value Iteration
 Currently, there is an incomplete implementation of the Reinforcement learning algorithm _Value Iteration_.
 The algorithm is working, but there are still some bugs and incomplete functions (eg the path calculation is incomplete).
