@@ -11,7 +11,7 @@
 class AStarOperator : public RobotOperator {
 private:
 public:
-    AStarOperator(RobotControlInterface *robot, std::string map_filename);
+    AStarOperator(RobotControlInterface *robot, std::string map_filename, cv::Point2i startLocation);
 
     void update() override;
 };

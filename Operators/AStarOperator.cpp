@@ -10,8 +10,7 @@
 using chrono_clock = std::chrono::system_clock;
 using chrono_ms = std::chrono::duration<double, std::milli>;
 
-AStarOperator::AStarOperator(RobotControlInterface *robot, std::string map_filename) : RobotOperator(robot) {
-    cv::Point2i startLocation(310, 300);
+AStarOperator::AStarOperator(RobotControlInterface *robot, std::string map_filename, cv::Point2i startLocation) : RobotOperator(robot) {
     cv::Point2i targetLocation(750, 700);
 
 //    AStar aStar = AStar(map_filename, this->robot->get_radius() + 3);;

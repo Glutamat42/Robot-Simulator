@@ -9,15 +9,15 @@ void AStarScenario::setUp() {
     std::string mapName = "assets/maps/world1.png";
     this->world = new World(mapName);
 
-
-    Robot *r = new Robot(std::string("r1"), 8, cv::Point2d(310.0, 300.0), 1.0 * M_PI, world, M_PI / 2, 40);
+    cv::Point2d startLocation = cv::Point2d(310.0, 300.0);
+    Robot *r = new Robot(std::string("r1"), 8, startLocation, 1.0 * M_PI, world, M_PI / 2, 40);
     DistanceSensor *s1 = new DistanceSensor(world, r, 0.15 * M_PI, 800);
     DistanceSensor *s2 = new DistanceSensor(world, r, 0.25 * M_PI, 800);
     DistanceSensor *s3 = new DistanceSensor(world, r, -0.15 * M_PI, 800);
     DistanceSensor *s4 = new DistanceSensor(world, r, -0.25 * M_PI, 800);
     DistanceSensor *s5 = new DistanceSensor(world, r, 0.05 * M_PI, 800);
     DistanceSensor *s6 = new DistanceSensor(world, r, -0.05 * M_PI, 800);
-    DistanceSensor *s7 = new DistanceSensor(world, r, -0.35 * M_PI, 800);
+    DistanceSensor *s7 = new DistanceSensor(world, r, 0.35 * M_PI, 800);
     DistanceSensor *s8 = new DistanceSensor(world, r, -0.35 * M_PI, 800);
     r->add_sensor(s1);
     r->add_sensor(s2);
@@ -29,7 +29,7 @@ void AStarScenario::setUp() {
     r->add_sensor(s8);
 
     world->add_object(r);
-    RobotOperator *ro = new AStarOperator(r, mapName);
+    RobotOperator *ro = new AStarOperator(r, mapName, startLocation);
 
     sensors.push_back(s1);
     sensors.push_back(s2);
