@@ -55,6 +55,13 @@ The simulation ran with an unlimited speed multiplier (-> as fast possible).
 
 ![Q-Learning animation](docs/assets/qlearning.gif)
 
+During training the rewards will be logged to the logs directory as a csv file. 
+The logs directory also contains gnuplot file which can be used to plot the results.
+You need the gnuplot library installed (not plotlib) and edit the filename set in example.gnuplot file.
+Now run `gnuplot -p example.gnuplot` to get your log plotted.
+
+![Q-Learning logs plot](docs/assets/qlearning_logs_plot.png)
+
 ## Value Iteration
 Currently, there is an incomplete implementation of the Reinforcement learning algorithm _Value Iteration_.
 The algorithm is working, but there are still some bugs and incomplete functions (eg the path calculation is incomplete).

@@ -5,13 +5,22 @@
 #include "QLearningScenario.h"
 
 void QLearningScenario::setUp() {
+    // setup logfile (log training progress)
+    auto t = std::time(nullptr);
+    auto tm = *std::localtime(&t);
+    std::stringstream dateStream;
+    dateStream << std::put_time(&tm, "%d-%m-%Y_%H-%M-%S");
+    std::string dateTimeString = dateStream.str();
+    this->logfile.open("logs/" + dateTimeString + "_q-learning.csv");
+
+    // setup actual scenario (for the first epoch)
     this->resetScenario();
 }
 
 void QLearningScenario::afterUpdate() {
     this->cur_step++;
     if (this->cur_step == this->MAX_STEPS_PER_EPISODE) {
-        std::cout << this->cur_epoch << ";" << this->ro->getCollectedReward() << std::endl;
+        this->logfile << this->cur_epoch << "," << this->ro->getCollectedReward() << std::endl;
 
         if (this->cur_epoch == this->NR_EPISODES) {
             // training finished
@@ -51,4 +60,8 @@ void QLearningScenario::resetScenario() {
     robotOperators.push_back(this->ro);
 
     this->init(false);
+}
+
+QLearningScenario::~QLearningScenario() {
+    this->logfile.close();
 }
