@@ -267,16 +267,11 @@ ParticleEvaluationData ParticleFilter::update(double distance, double angle) {
             this->weights.erase(this->weights.begin(), this->weights.begin() + removeElementsCount);
             this->particles.erase(this->particles.begin(), this->particles.begin() + removeElementsCount);
 
-            // replace random particles with random values to allow recovery in case the detection went horribly wrong
-            // TODO: use particles with lowest weight to replace
+            // generate new particles to replace the removed ones
             std::vector<std::array<double, 3>> randomParticles = create_uniform_particles(this->particles_world->get_map_bounds().x,
                                                                                           this->particles_world->get_map_bounds().y,
                                                                                           removeElementsCount);
-            for (int i = 0; i < randomParticles.size(); ++i) {
-                this->particles.push_back(randomParticles[i]);
-                this->weights.push_back(0); // weight doesnt matter, will be recalculated before used
-            }
-            // END: select the worst rated particles and replace them with random
+            this->particles.insert(this->particles.end(), randomParticles.begin(), randomParticles.end());
         }
     }
     this->iterationsCounter++;
